@@ -221,8 +221,8 @@ ul {
   position: fixed;
   bottom: 20px;
   right: calc(16.67vw + 20px);
-  width: 300px;
-  height: 400px;
+  width: calc(16.67vw + 0px);
+  height: calc(20vw + 0px);
   background-color: #202123;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0,0,0,0.5);
@@ -268,13 +268,14 @@ ul {
 .chat-popup-input {
   display: flex;
   padding: 15px;
+  height: 70px;
   gap: 10px;
   border-top: 1px solid #444;
 }
 
 .chat-popup-input input {
   flex: 1;
-  padding: 8px;
+  padding: 3px;
   border-radius: 4px;
   border: 1px solid #555;
   background-color: #40414F;
@@ -282,7 +283,7 @@ ul {
 }
 
 .chat-popup-input button {
-  padding: 8px 15px;
+  padding: calc(0.3vw) calc(0.3vw);
   background-color: #00b29e;
   border: none;
   border-radius: 4px;
