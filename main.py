@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from database import get_db
 from pydub import AudioSegment
+from pydub.silence import detect_silence
 from models import Meeting, MeetingContent, Settings
 import gemini
 
@@ -38,25 +39,32 @@ HOP_SIZE = 2000
 async def transcript(websocket: WebSocket):
     await websocket.accept()
     audio_data = b''
-    current_time = 0
+    processed_time = 0
+    block_start_time = 0
     block_text = ''
+    block_id = 0
 
     try:
         while True:
             audio_data += await websocket.receive_bytes()
-            audio: AudioSegment = AudioSegment.from_file(
-                io.BytesIO(audio_data), format='webm')
+            audio = AudioSegment.from_file(io.BytesIO(audio_data), format='webm')
+            silences = detect_silence(audio, min_silence_len=500, silence_thresh=-40)
+            if silences and block_start_time < silences[-1][0]:
+                block_start_time = silences[-1][1]
+                if block_text:
+                    block_text = ''
+                    block_id += 1
 
-            while len(audio) - current_time > WIN_SIZE:
+            while len(audio) - processed_time > WIN_SIZE:
                 buffer = io.BytesIO()
-                audio[current_time:current_time + WIN_SIZE].export(buffer, format='mp3')
-                current_time += HOP_SIZE
+                audio[processed_time:processed_time + WIN_SIZE].export(buffer, format='mp3')
+                processed_time += HOP_SIZE
 
                 answer, score = await gemini.speech2text(buffer.getvalue())
                 block_text = gemini.merge_text(block_text, answer, score)
                 block_text = gemini.correct_keywords(block_text)
                 await websocket.send_json({
-                    'block_id': 1,
+                    'block_id': block_id,
                     'text': block_text,
                     'keywords': [
                         {
