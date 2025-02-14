@@ -333,6 +333,7 @@ ul {
 }
 
 /* 搜尋欄位樣式 */
+/* 搜尋欄位樣式 */
 .sidebar-search {
     display: flex;
     align-items: center;
@@ -344,6 +345,8 @@ ul {
 
 .sidebar-search input {
     flex: 1;
+    height: 38px;
+    /* 固定高度 */
     padding: 8px;
     font-size: 1rem;
     background-color: #40414F;
@@ -354,12 +357,19 @@ ul {
 }
 
 .sidebar-search button {
+    height: 38px;
+    /* 與 input 相同的高度 */
     background-color: #00b29e;
     border: none;
-    padding: 10px 12px;
+    padding: 0 15px;
+    /* 調整水平內邊距 */
     border-radius: 0 20px 20px 0;
     cursor: pointer;
     color: #ffffff;
+    display: flex;
+    /* 添加這個確保內容垂直居中 */
+    align-items: center;
+    /* 添加這個確保內容垂直居中 */
 }
 
 .sidebar-search button:hover {
