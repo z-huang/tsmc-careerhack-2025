@@ -74,7 +74,7 @@ ul {
 .sidebar-nav li a:hover,
 .sidebar-section li a:hover {
     opacity: 1;
-    color: #00b29e;
+    color: #6ab0c4;
 }
 
 .sidebar-section {
@@ -104,32 +104,6 @@ ul {
     transition: transform 0.3s ease, width 0.3s ease;
 }
 
-/* TOGGLE BUTTON */
-/* .toggle-btn {
-    position: fixed;
-    left: calc(16.67vw - 40px);
-    top: 20px;
-    background-color: #202123;
-    border: 1px solid #444;
-    color: #ffffff;
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    transition: all 0.3s ease;
-}
-
-.toggle-btn:hover {
-    background-color: #2c2d31;
-}
-
-.sidebar.collapsed~.toggle-btn {
-    left: 20px;
-} */
 
 /* MAIN CONTENT */
 .main-content {
@@ -287,7 +261,7 @@ ul {
 
 .chat-popup-input button {
     padding: calc(0.3vw) calc(0.3vw);
-    background-color: #00b29e;
+    background-color: #6ab0c4;
     border: none;
     border-radius: 4px;
     color: #ffffff;
@@ -295,7 +269,7 @@ ul {
 }
 
 .chat-popup-input button:hover {
-    background-color: #008f87;
+    background-color: #6ab0c4;
 }
 
 /* SCROLLBAR STYLING */
@@ -332,7 +306,7 @@ ul {
     background: #777;
 }
 
-/* 搜尋欄位樣式 */
+
 /* 搜尋欄位樣式 */
 .sidebar-search {
     display: flex;
@@ -359,7 +333,7 @@ ul {
 .sidebar-search button {
     height: 38px;
     /* 與 input 相同的高度 */
-    background-color: #00b29e;
+    background-color: #6ab0c4;
     border: none;
     padding: 0 15px;
     /* 調整水平內邊距 */
@@ -373,7 +347,7 @@ ul {
 }
 
 .sidebar-search button:hover {
-    background-color: #008f87;
+    background-color: #6ab0c4;
 }
 
 /* 🔥 搜尋結果的彈出視窗 (顯示在搜尋欄上方) */
@@ -457,7 +431,7 @@ ul {
 }
 
 .search-popup-results li a:hover {
-    color: #00b29e;
+    color: #6ab0c4;
 }
 
 /* DROPDOWN */
@@ -493,13 +467,13 @@ ul {
 
 .dropdown-content a:hover {
     background-color: #2c2d31;
-    color: #00b29e;
+    color: #6ab0c4;
 }
 
 /* Add active state style */
 .dropdown-content a.active {
     background-color: #2c2d31;
-    color: #00b29e;
+    color: #6ab0c4;
 }
 
 /* Add language icon style */
@@ -512,7 +486,8 @@ ul {
 .button-group {
     position: fixed;
     top: 20px;
-    left: calc(16.67vw - 80px); /* 預留兩個按鈕的寬度加間距 */
+    left: calc(16.67vw - 80px);
+    /* 預留兩個按鈕的寬度加間距 */
     display: flex;
     gap: 8px;
     z-index: 1000;
@@ -520,7 +495,7 @@ ul {
 }
 
 /* 當 sidebar 收起時按鈕組一起移動 */
-.sidebar.collapsed ~ .button-group {
+.sidebar.collapsed~.button-group {
     left: 20px;
 }
 
