@@ -1,6 +1,6 @@
 
 from sqlalchemy import Column, Integer, String, Date, ForeignKey, Time
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Session
 from database import engine, Base
 
 
@@ -32,3 +32,11 @@ class MeetingContent(Base):
 
 if __name__ == '__main__':
     Base.metadata.create_all(bind=engine)
+    
+    with Session(bind=engine) as session:
+        existing_setting = session.query(Settings).filter(
+            Settings.key == "language").first()
+        if not existing_setting:
+            language_setting = Settings(key="language", value="cmn-Hant-TW")
+            session.add(language_setting)
+            session.commit()
