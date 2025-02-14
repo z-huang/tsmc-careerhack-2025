@@ -1,8 +1,13 @@
-from fastapi import FastAPI, Depends, HTTPException
+import datetime
+import io
+import tempfile
+from fastapi import FastAPI, Depends, HTTPException, WebSocket, WebSocketDisconnect
+import ipdb
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel
 from database import get_db
+from pydub import AudioSegment
 from models import Meeting, MeetingContent
 import gemini
 
@@ -24,6 +29,35 @@ async def translate(input_data: TranslateInput):
         "text": translated_text,
         "keywords": 'NotImplemented'
     }
+
+WIN_SIZE = 3000
+HOP_SIZE = 2000
+
+
+@app.websocket("/ws/transcript")
+async def transcript(websocket: WebSocket):
+    await websocket.accept()
+    audio_data = b''
+    current_time = 0
+    block_text = ''
+
+    try:
+        while True:
+            audio_data += await websocket.receive_bytes()
+            audio: AudioSegment = AudioSegment.from_file(
+                io.BytesIO(audio_data), format='webm')
+
+            while len(audio) - current_time > WIN_SIZE:
+                buffer = io.BytesIO()
+                audio[current_time:current_time + WIN_SIZE].export(buffer, format='mp3')
+                current_time += HOP_SIZE
+
+                answer, score = await gemini.speech2text(buffer.getvalue())
+                block_text = gemini.merge_text(block_text, answer, score)
+                await websocket.send_text(f"Transcription: {block_text}")
+
+    except WebSocketDisconnect:
+        print("Client disconnected.")
 
 
 @app.post("/get_meetings")

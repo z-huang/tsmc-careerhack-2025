@@ -1,5 +1,5 @@
 
-from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, Time
 from sqlalchemy.orm import relationship
 from database import engine, Base
 
@@ -18,9 +18,10 @@ class MeetingContent(Base):
     id = Column(Integer, primary_key=True, index=True)
     meeting_id = Column(String, ForeignKey('meetings.meeting_id'))
     message = Column(String)
-    time = Column(String)
+    time = Column(Time)
 
     meeting = relationship("Meeting", back_populates="contents")
+
 
 if __name__ == '__main__':
     Base.metadata.create_all(bind=engine)
