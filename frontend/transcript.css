@@ -584,10 +584,11 @@ ul {
 
 /* History block 樣式 */
 .history-block {
-    position: relative; /* 為了放置 ... 按鈕 */
+    position: relative;
+    /* 為了放置 ... 按鈕 */
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;  /* 改成 flex-start 讓內容對齊上方 */
+    align-items: center;
     padding: 12px 15px;
     background-color: #2c2d31;
     border-radius: 4px;
@@ -603,7 +604,8 @@ ul {
 .history-content {
     display: flex;
     flex-direction: column;
-    gap: 8px;  /* 控制 title 和 timestamp 的間距 */
+    gap: 8px;
+    /* 控制 title 和 timestamp 的間距 */
 }
 
 .history-block .title {
@@ -612,21 +614,26 @@ ul {
 }
 
 .history-block .timestamp {
-    color: #8ec5d6; 
+    color: #8ec5d6;
     font-size: 0.8rem;
-    opacity: 0.7;  
+    opacity: 0.7;
 }
 
 /* 右側選單按鈕 */
 .history-menu-btn {
-    opacity: 0; /* 預設隱藏 */
+    opacity: 0;
+    /* 預設隱藏 */
     cursor: pointer;
     padding: 2px 8px;
     transition: opacity 0.2s ease;
+    font-size: 25px;
+    /* 增加字體大小 */
+    line-height: 1;
 }
 
 .history-block:hover .history-menu-btn {
-    opacity: 1; /* hover 時顯示 */
+    opacity: 1;
+    /* hover 時顯示 */
 }
 
 /* 下拉選單 */
