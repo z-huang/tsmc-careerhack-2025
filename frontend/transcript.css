@@ -186,3 +186,55 @@
     background: #777;
   }
   
+
+  /* Sidebar transition */
+.sidebar {
+  transition: transform 0.3s ease, width 0.3s ease;
+  position: relative;
+}
+
+.sidebar.collapsed {
+  transform: translateX(-280px);
+  width: 0;
+}
+
+/* Toggle button */
+/* Toggle button */
+.toggle-btn {
+  position: absolute;
+  right: -40px;
+  top: 20px;
+  background-color: #202123;
+  border: 1px solid #444;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  transition: background-color 0.2s ease;
+  /* 添加這些樣式確保按鈕不會被隱藏 */
+  position: fixed;  /* 改為固定定位 */
+  left: 260px;     /* 直接指定距離左側的距離 */
+}
+
+/* 當 sidebar 收起時調整按鈕位置 */
+.sidebar.collapsed + .toggle-btn {
+  left: 0;
+}
+
+.toggle-btn:hover {
+  background-color: #2c2d31;
+}
+
+/* Main content transition */
+.main-content {
+  transition: margin-left 0.3s ease;
+}
+
+.main-content.expanded {
+  margin-left: -280px;
+}

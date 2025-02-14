@@ -1,13 +1,31 @@
-// Simple JS to demonstrate button click or input usage
+// Sidebar toggle functionality
+document.addEventListener('DOMContentLoaded', function () {
+  const sidebar = document.getElementById('sidebar');
+  const mainContent = document.getElementById('mainContent');
+  const toggleBtn = document.getElementById('toggleSidebar');
+
+  toggleBtn.addEventListener('click', function () {
+    sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('expanded');
+
+    if (sidebar.classList.contains('collapsed')) {
+      toggleBtn.innerHTML = '☰';
+    } else {
+      toggleBtn.innerHTML = '←';
+    }
+  });
+});
+
+// Chat functionality
 const userInput = document.getElementById('userInput');
 const sendBtn = document.getElementById('sendBtn');
 const messageArea = document.getElementById('messageArea');
 
-// Example event: Sending the user’s message
+// Example event: Sending the user's message
 sendBtn.addEventListener('click', () => {
   const text = userInput.value.trim();
   if (!text) return;
-  
+
   // Display user message in the message area (if you want a chat-like effect)
   const userMsgDiv = document.createElement('div');
   userMsgDiv.style.margin = '10px 0';

@@ -1,23 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ChatGPT-like Dark UI</title>
   <link rel="stylesheet" href="./transcript.css" />
 </head>
+
 <body>
   <div class="app-container">
-    
+
     <!-- LEFT SIDEBAR -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <h2>History</h2>
       </div>
       <hr>
       <nav class="sidebar-nav">
         <ul>
-          <li><a href="#">Current Trancript</a></li>
+          <li><a href="#">New Transcript</a></li>
         </ul>
       </nav>
       &nbsp;
@@ -53,8 +55,12 @@
       </div>
     </div>
 
+    <button class="toggle-btn" id="toggleSidebar">
+      ☰
+    </button>
+
     <!-- MAIN CHAT AREA -->
-    <div class="main-content">
+    <div class="main-content" id="mainContent">
       <div class="main-header">
         <h2>Transcript</h2>
       </div>
@@ -62,14 +68,10 @@
       <div class="prompt-container">
         <h1>我可以為你做什麼？</h1>
         <div class="chat-input">
-          <input 
-            type="text" 
-            id="userInput" 
-            placeholder="傳訊息給 ChatGPT" 
-          />
+          <input type="text" id="userInput" placeholder="傳訊息給 ChatGPT" />
           <button id="sendBtn">搜尋</button>
         </div>
-        
+
         <!-- Suggestion tags -->
         <div class="suggestion-tags">
           <button class="tag-btn">建立圖像</button>
@@ -93,4 +95,5 @@
 
   <script src="./transcript.js"></script>
 </body>
+
 </html>
