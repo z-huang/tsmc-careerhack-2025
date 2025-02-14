@@ -2,131 +2,143 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ChatGPT-like Dark UI</title>
-  <link rel="stylesheet" href="./transcript.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChatGPT-like Dark UI</title>
+    <link rel="stylesheet" href="./transcript.css" />
 </head>
 
 <body>
-  <div class="app-container">
+    <div class="app-container">
 
-    <!-- LEFT SIDEBAR -->
-    <div class="sidebar" id="leftsidebar">
-      <div class="sidebar-header">
-        <h2>History</h2>
-      </div>
-      <hr>
-      <nav class="sidebar-nav">
-        <ul>
-          <li><a href="#">New Transcript</a></li>
-        </ul>
-      </nav>
-      &nbsp;
-      &nbsp;
-      &nbsp;
-      <hr>
+        <!-- LEFT SIDEBAR -->
+        <div class="sidebar" id="leftsidebar">
+            <div class="sidebar-header">
+                <h2>History</h2>
+            </div>
+            <hr>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#">New Transcript</a></li>
+                </ul>
+            </nav>
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            <hr>
 
 
-      <div class="sidebar-section">
-        <h3>今天</h3>
-        <ul>
-          <li><a href="#">Template Request Clarification</a></li>
-          <li><a href="#">ChatGPT 項目開發</a></li>
-          <li><a href="#">學生研究計畫評估</a></li>
-          <li><a href="#">智慧居家採購建議</a></li>
-          <li><a href="#">160公分理想體重</a></li>
-        </ul>
-      </div>
+            <div class="sidebar-section">
+                <h3>今天</h3>
+                <ul>
+                    <li><a href="#">Template Request Clarification</a></li>
+                    <li><a href="#">ChatGPT 項目開發</a></li>
+                    <li><a href="#">學生研究計畫評估</a></li>
+                    <li><a href="#">智慧居家採購建議</a></li>
+                    <li><a href="#">160公分理想體重</a></li>
+                </ul>
+            </div>
 
-      <div class="sidebar-section">
-        <h3>昨天</h3>
-        <ul>
-          <li><a href="#">CoppeliaSim OpenGL Error Fix</a></li>
-          <li><a href="#">Meeting Transcription and Summary</a></li>
-          <li><a href="#">尿頻尿急比對判斷</a></li>
-          <li><a href="#">BMW 318Ci 2004介紹</a></li>
-        </ul>
-      </div>
-      <!-- SEARCH RESULT POPUP (NOW ABOVE SEARCH BAR) -->
-    <div id="searchPopup" class="search-popup">
-        <div class="search-popup-header">
-        <h3>搜尋結果</h3>
-        <button class="close-btn" id="closeSearchBtn">×</button>
+            <div class="sidebar-section">
+                <h3>昨天</h3>
+                <ul>
+                    <li><a href="#">CoppeliaSim OpenGL Error Fix</a></li>
+                    <li><a href="#">Meeting Transcription and Summary</a></li>
+                    <li><a href="#">尿頻尿急比對判斷</a></li>
+                    <li><a href="#">BMW 318Ci 2004介紹</a></li>
+                </ul>
+            </div>
+            <!-- SEARCH RESULT POPUP (NOW ABOVE SEARCH BAR) -->
+            <div id="searchPopup" class="search-popup">
+                <div class="search-popup-header">
+                    <h3>搜尋結果</h3>
+                    <button class="close-btn" id="closeSearchBtn">×</button>
+                </div>
+                <div class="search-popup-results" id="searchResults">
+                    <!-- 搜尋結果將顯示於此 -->
+                </div>
+            </div>
+
+            <!-- SEARCH BAR -->
+            <div class="sidebar-search">
+                <input type="text" id="searchInput" placeholder="Search..." />
+                <button id="searchBtn">🔍</button>
+            </div>
+
+
         </div>
-        <div class="search-popup-results" id="searchResults">
-        <!-- 搜尋結果將顯示於此 -->
+
+        <div class="sidebar" id="rightsidebar">
+            <div class="sidebar-header">
+                <h2>Terminology</h2>
+            </div>
+            <hr>
+
         </div>
+
+        <button class="toggle-btn" id="toggleSidebar">
+            ←
+        </button>
+
+        <!-- MAIN CHAT AREA -->
+        <div class="main-content" id="mainContent">
+            <div class="main-header">
+                <h2>Transcript</h2>
+            </div>
+
+            <div class="prompt-container">
+                <h1>Transcript</h1>
+                <div class="action-buttons">
+                    <button class="action-btn record-btn">
+                        <span class="btn-icon">●</span>
+                        Record
+                    </button>
+                    <button class="action-btn upload-btn">
+                        <span class="btn-icon">↑</span>
+                        Upload
+                    </button>
+                    <button class="action-btn chat-btn" id="chatBtn">
+                        <span class="btn-icon">💬</span>
+                        Chat
+                    </button>
+                    <div class="dropdown">
+                        <button class="action-btn language-btn">
+                            <span class="btn-icon">🌐</span>
+                            中文
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="#" data-lang="zh" class="active">中文</a>
+                            <a href="#" data-lang="en">English</a>
+                            <a href="#" data-lang="ja">日本語</a>
+                            <a href="#" data-lang="de">Deutsch</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="transcriptArea" class="transcript-area">
+                <!-- Transcript content will appear here -->
+            </div>
+
+            <!-- Chat popup -->
+            <div id="chatPopup" class="chat-popup">
+                <div class="chat-popup-header">
+                    <h3>Chat Assistant</h3>
+                    <button class="close-btn" id="closeChatBtn">×</button>
+                </div>
+                <div class="chat-popup-messages" id="chatMessages">
+                    <!-- Chat messages will appear here -->
+                </div>
+                <div class="chat-popup-input">
+                    <input type="text" placeholder="Type your message..." id="chatInput">
+                    <button id="sendChatBtn">Send</button>
+                </div>
+            </div>
+        </div>
+
     </div>
-    
-    <!-- SEARCH BAR -->
-    <div class="sidebar-search">
-        <input type="text" id="searchInput" placeholder="搜尋..." />
-        <button id="searchBtn">🔍</button>
-    </div>
-  
-        
-    </div>
 
-    <div class="sidebar" id="rightsidebar">
-      <div class="sidebar-header">
-        <h2>Terminology</h2>
-      </div>
-      <hr>
-
-    </div>
-
-    <button class="toggle-btn" id="toggleSidebar">
-      ←
-    </button>
-
-    <!-- MAIN CHAT AREA -->
-    <div class="main-content" id="mainContent">
-      <div class="main-header">
-        <h2>Transcript</h2>
-      </div>
-
-      <div class="prompt-container">
-        <h1>Transcript</h1>
-        <div class="action-buttons">
-          <button class="action-btn record-btn">
-            <span class="btn-icon">●</span>
-            Record
-          </button>
-          <button class="action-btn upload-btn">
-            <span class="btn-icon">↑</span>
-            Upload
-          </button>
-          <button class="action-btn chat-btn" id="chatBtn">
-            <span class="btn-icon">💬</span>
-            Chat
-          </button>
-        </div>
-      </div>
-
-      <div id="transcriptArea" class="transcript-area">
-        <!-- Transcript content will appear here -->
-      </div>
-
-      <!-- Chat popup -->
-      <div id="chatPopup" class="chat-popup">
-        <div class="chat-popup-header">
-          <h3>Chat Assistant</h3>
-          <button class="close-btn" id="closeChatBtn">×</button>
-        </div>
-        <div class="chat-popup-messages" id="chatMessages">
-          <!-- Chat messages will appear here -->
-        </div>
-        <div class="chat-popup-input">
-          <input type="text" placeholder="Type your message..." id="chatInput">
-          <button id="sendChatBtn">Send</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <script src="./transcript.js"></script>
+    <script src="./transcript.js"></script>
 </body>
 
 </html>
