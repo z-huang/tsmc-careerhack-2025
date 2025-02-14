@@ -54,7 +54,11 @@ async def transcript(websocket: WebSocket):
 
                 answer, score = await gemini.speech2text(buffer.getvalue())
                 block_text = gemini.merge_text(block_text, answer, score)
-                await websocket.send_text(f"Transcription: {block_text}")
+                await websocket.send_json({
+                    'block_id': 1,
+                    'text': block_text,
+                    'keywords': []
+                })
 
     except WebSocketDisconnect:
         print("Client disconnected.")

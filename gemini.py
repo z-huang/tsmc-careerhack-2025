@@ -1,11 +1,12 @@
 import asyncio
 import re
 from google.cloud import aiplatform
+from google.cloud.speech_v2 import SpeechClient
+from google.cloud.speech_v2.types import cloud_speech
 import vertexai
 from vertexai.generative_models import GenerativeModel
 import vertexai.preview.generative_models as generative_models
-from google.cloud.speech_v2 import SpeechClient
-from google.cloud.speech_v2.types import cloud_speech
+from proper_noun import english_dict, german_dict, chinese_dict, japanese_dict, description_dict, all_proper_nouns
 from config import PROJECT_ID, LOCATION
 
 aiplatform.init(project=PROJECT_ID, location=LOCATION)
@@ -52,9 +53,11 @@ def translate_text(text: str, target_lang: str, source_lang=None) -> str:
     print(response.text.rstrip())
     return response.text.rstrip()
 
+
 async def recognize_audio(client, request):
     """Run speech recognition in a separate thread."""
     return await asyncio.to_thread(client.recognize, request=request)
+
 
 async def speech2text(audio_content: bytes):
     client = SpeechClient()
@@ -123,11 +126,12 @@ def merge_text(A: str, B: str, conf=-1):
     prompt = (
         "## System\n"
         "You are an AI that merges overlapping sentences while preserving meaning and fluency. "
+        "The context is a meeting record, so it might contain different people speaking with different languages."
         "Fix speech recognition errors and ensure grammatical correctness.\n\n"
 
         "## Input\n"
-        f"Sentence Pre (may be empty): {A}\n"
-        f"Sentence Suf: {B}\n"
+        f"Sentence PRE (may be empty): {A}\n"
+        f"Sentence SUF: {B}\n"
         f"Confidence of Sentence Suf: {conf} (-1 if undefined)"
         f"Pre must go before Suf, and Pre might overlap with Suf.\n\n"
 
@@ -146,7 +150,7 @@ def merge_text(A: str, B: str, conf=-1):
 
         "## Response Format\n"
         "### Thought Process ###\n"
-        "[Explain how you identified complete and incomplete parts]\n"
+        "[Explain how you identified errors and merge the PRE and SUF strings]\n"
         "### Merged Text ###\n"
         "[Full merged sentence]\n"
         "### End ###\n\n"
@@ -172,18 +176,20 @@ def merge_text(A: str, B: str, conf=-1):
         # "NOTE: The **Complete Part must be go before the **Incomplete Part**. Do not reorder.\n"
     )
 
-    response = model.generate_content(
-        [prompt],
-        generation_config=generation_config,
-        safety_settings=safety_settings,
-    )
-
     # Extract merged sentence
 
-    match = re.search(r"### Merged Text ###\n(.*?)\n### End ###",
-                      response.text, re.DOTALL)
-    # TODO: add something to check if the format is correct and provide more error detection
-    merged_text = match.group(1).strip() if match else ""
+    match = None
+    while match is None:
+        response = model.generate_content(
+            [prompt],
+            generation_config=generation_config,
+            safety_settings=safety_settings,
+        )
+        match = re.search(r"### Merged Text ###\n(.*?)\n### End ###",
+                          response.text, re.DOTALL)
+        # TODO: add something to check if the format is correct and provide more error detection
+
+        merged_text = match.group(1).strip() if match else ""
 
     # Extract Complete Part
     # match = re.search(r"### Complete Part ###\n(.*?)\n### Incomplete Part ###", response.text, re.DOTALL)
@@ -202,6 +208,86 @@ def merge_text(A: str, B: str, conf=-1):
     '''
 
     return merged_text
+
+
+def find_proper_noun_positions(text, proper_noun_dicts):
+    """
+    Identifies occurrences of proper nouns in the text and returns their positions.
+
+    Args:
+    - text (str): The input text to search within.
+    - proper_noun_dicts (dict): A dictionary where keys are entry IDs, and values are dictionaries containing proper nouns in multiple languages.
+
+    Returns:
+    - List of tuples (proper_noun_id, start_position).
+    """
+    matches = []
+
+    # Iterate over each entry ID and its proper nouns
+    for entry_id, proper_nouns in proper_noun_dicts.items():
+        for lang, noun in proper_nouns.items():
+            print(entry_id, noun)
+            if noun:  # Ensure the noun exists
+                # Use regex to find all occurrences of the noun in the text (case-sensitive)
+                for match in re.finditer(rf'{re.escape(noun)}', text, re.IGNORECASE):
+                    matches.append((entry_id, match.start(), match.start() + len(noun)))
+
+    # Sort by position to maintain order
+    matches.sort(key=lambda x: x[1])
+
+    return sorted(set(matches))
+
+
+def detect_nouns(s: str):
+    prompt = (
+        "## System\n"
+        "You are an AI that detects and corrects the spelling of known proper nouns in a given text.\n"
+        "Your goal is to identify occurrences of proper nouns across multiple languages (English, Chinese, German, Japanese) and ensure they appear with the correct spelling while keeping the rest of the text unchanged.\n\n"
+
+        "## Input\n"
+        "**Proper Nouns (By Language)**\n"
+        f"English: {english_dict}\n"
+        f"Chinese: {chinese_dict}\n"
+        f"German: {german_dict}\n"
+        f"Japanese: {japanese_dict}\n\n"
+        f"Descriptions (in English): {description_dict}"
+
+        "**Text to Analyze**\n"
+        f"{s}\n\n"
+
+        "## Task\n"
+        "1. Identify any mentions of the provided proper nouns in the input text (even if they contain minor spelling errors or OCR recognition issues).\n"
+        "2. Correct the spelling of detected proper nouns to match their official forms from the provided list.\n"
+        "3. Keep the rest of the text unchanged.\n"
+        "4. Ensure that the corrected text maintains the original meaning, language and fluency.\n\n"
+
+        "## Response Format (Strict Output)**\n"
+        "**Corrected Text:**\n"
+        "[Corrected version of the input text with proper noun spellings fixed]\n\n"
+
+        "**Input Text:**\n"
+        "\"I am using bigquery for data analysis. Also testing クラウド らん for deployment.\"\n\n"
+
+        "**Expected Response:**\n"
+        "**Corrected Text:**\n"
+        "\"I am using BigQuery for data analysis. Also testing クラウドラン for deployment.\"\n\n"
+
+        "**Ensure that the output is strictly just the corrected text with no extra formatting or explanations!**"
+    )
+
+    response = model.generate_content(
+        [prompt],
+        generation_config=generation_config,
+        safety_settings=safety_settings,
+    )
+
+    match = re.search(r"\*\*Corrected Text:\*\*\n(.+)", response.text, re.DOTALL)
+    extracted = match.group(1)
+    print(extracted)
+
+    answer = find_proper_noun_positions(extracted, all_proper_nouns)
+    return answer
+    # Now return the good formatted
 
 
 if __name__ == "__main__":
