@@ -1,5 +1,5 @@
 {
-    "zh": {
+  "zh": {
       "history": "歷史",
       "transcript": "文字記錄",
       "terminology": "術語",
@@ -7,9 +7,12 @@
       "upload": "上傳",
       "chat": "聊天",
       "search_placeholder": "搜尋...",
-      "search_results": "搜尋結果"
-    },
-    "en": {
+      "search_results": "搜尋結果",
+      "chat_assistant": "聊天助手",
+      "chat_placeholder": "輸入你的訊息...",
+      "send": "發送"
+  },
+  "en": {
       "history": "History",
       "transcript": "Transcript",
       "terminology": "Terminology",
@@ -17,19 +20,25 @@
       "upload": "Upload",
       "chat": "Chat",
       "search_placeholder": "Search...",
-      "search_results": "Search Results"
-    },
-    "ja": {
-      "history": "歴史",
+      "search_results": "Search Results",
+      "chat_assistant": "Chat Assistant",
+      "chat_placeholder": "Type your message...",
+      "send": "Send"
+  },
+  "ja": {
+      "history": "履歴",
       "transcript": "トランスクリプト",
       "terminology": "用語",
       "record": "録音",
       "upload": "アップロード",
       "chat": "チャット",
       "search_placeholder": "検索...",
-      "search_results": "検索結果"
-    },
-    "de": {
+      "search_results": "検索結果",
+      "chat_assistant": "チャットアシスタント",
+      "chat_placeholder": "メッセージを入力してください...",
+      "send": "送信"
+  },
+  "de": {
       "history": "Verlauf",
       "transcript": "Transkript",
       "terminology": "Begriffe",
@@ -37,7 +46,9 @@
       "upload": "Hochladen",
       "chat": "Chat",
       "search_placeholder": "Suche...",
-      "search_results": "Suchergebnisse"
-    }
+      "search_results": "Suchergebnisse",
+      "chat_assistant": "Chat-Assistent",
+      "chat_placeholder": "Geben Sie Ihre Nachricht ein...",
+      "send": "Senden"
   }
-  
+}
