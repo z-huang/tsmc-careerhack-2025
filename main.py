@@ -1,10 +1,6 @@
-import datetime
 import io
-import tempfile
 from fastapi import FastAPI, Depends, HTTPException, WebSocket, WebSocketDisconnect
-import ipdb
 from sqlalchemy.orm import Session
-from typing import List, Optional
 from pydantic import BaseModel
 from database import get_db
 from pydub import AudioSegment
@@ -54,10 +50,18 @@ async def transcript(websocket: WebSocket):
 
                 answer, score = await gemini.speech2text(buffer.getvalue())
                 block_text = gemini.merge_text(block_text, answer, score)
+                block_text = gemini.correct_keywords(block_text)
                 await websocket.send_json({
                     'block_id': 1,
                     'text': block_text,
-                    'keywords': []
+                    'keywords': [
+                        {
+                            'id': id,
+                            'start': start,
+                            'end': end
+                        }
+                        for id, start, end in gemini.find_keywords(block_text)
+                    ]
                 })
 
     except WebSocketDisconnect:

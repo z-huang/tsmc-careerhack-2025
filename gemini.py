@@ -1,12 +1,13 @@
 import asyncio
 import re
+from typing import List, Tuple
 from google.cloud import aiplatform
 from google.cloud.speech_v2 import SpeechClient
 from google.cloud.speech_v2.types import cloud_speech
 import vertexai
 from vertexai.generative_models import GenerativeModel
 import vertexai.preview.generative_models as generative_models
-from proper_noun import english_dict, german_dict, chinese_dict, japanese_dict, description_dict, all_proper_nouns
+from proper_noun import ENGLISH_DICT, GERMAN_DICT, CHINESE_DICT, JAPANESE_DICT, DESC_DICT, ALL_PROPER_NOUNS
 from config import PROJECT_ID, LOCATION
 
 aiplatform.init(project=PROJECT_ID, location=LOCATION)
@@ -50,11 +51,10 @@ def translate_text(text: str, target_lang: str, source_lang=None) -> str:
         generation_config=generation_config,
         safety_settings=safety_settings,
     )
-    print(response.text.rstrip())
     return response.text.rstrip()
 
 
-async def recognize_audio(client, request):
+async def _recognize_audio(client, request):
     """Run speech recognition in a separate thread."""
     return await asyncio.to_thread(client.recognize, request=request)
 
@@ -97,8 +97,8 @@ async def speech2text(audio_content: bytes):
     )
 
     response1, response2 = await asyncio.gather(
-        recognize_audio(client, request1),
-        recognize_audio(client, request2)
+        _recognize_audio(client, request1),
+        _recognize_audio(client, request2)
     )
 
     answer = ""
@@ -210,35 +210,7 @@ def merge_text(A: str, B: str, conf=-1):
     return merged_text
 
 
-def find_proper_noun_positions(text, proper_noun_dicts):
-    """
-    Identifies occurrences of proper nouns in the text and returns their positions.
-
-    Args:
-    - text (str): The input text to search within.
-    - proper_noun_dicts (dict): A dictionary where keys are entry IDs, and values are dictionaries containing proper nouns in multiple languages.
-
-    Returns:
-    - List of tuples (proper_noun_id, start_position).
-    """
-    matches = []
-
-    # Iterate over each entry ID and its proper nouns
-    for entry_id, proper_nouns in proper_noun_dicts.items():
-        for lang, noun in proper_nouns.items():
-            print(entry_id, noun)
-            if noun:  # Ensure the noun exists
-                # Use regex to find all occurrences of the noun in the text (case-sensitive)
-                for match in re.finditer(rf'{re.escape(noun)}', text, re.IGNORECASE):
-                    matches.append((entry_id, match.start(), match.start() + len(noun)))
-
-    # Sort by position to maintain order
-    matches.sort(key=lambda x: x[1])
-
-    return sorted(set(matches))
-
-
-def detect_nouns(s: str):
+def correct_keywords(s: str):
     prompt = (
         "## System\n"
         "You are an AI that detects and corrects the spelling of known proper nouns in a given text.\n"
@@ -246,11 +218,11 @@ def detect_nouns(s: str):
 
         "## Input\n"
         "**Proper Nouns (By Language)**\n"
-        f"English: {english_dict}\n"
-        f"Chinese: {chinese_dict}\n"
-        f"German: {german_dict}\n"
-        f"Japanese: {japanese_dict}\n\n"
-        f"Descriptions (in English): {description_dict}"
+        f"English: {ENGLISH_DICT}\n"
+        f"Chinese: {CHINESE_DICT}\n"
+        f"German: {GERMAN_DICT}\n"
+        f"Japanese: {JAPANESE_DICT}\n\n"
+        f"Descriptions (in English): {DESC_DICT}"
 
         "**Text to Analyze**\n"
         f"{s}\n\n"
@@ -283,11 +255,34 @@ def detect_nouns(s: str):
 
     match = re.search(r"\*\*Corrected Text:\*\*\n(.+)", response.text, re.DOTALL)
     extracted = match.group(1)
-    print(extracted)
+    return extracted
 
-    answer = find_proper_noun_positions(extracted, all_proper_nouns)
-    return answer
-    # Now return the good formatted
+
+def find_keywords(text) -> List[Tuple[int, int, int]]:
+    """
+    Identifies occurrences of proper nouns in the text and returns their positions.
+
+    Args:
+    - text (str): The input text to search within.
+    - proper_noun_dicts (dict): A dictionary where keys are entry IDs, and values are dictionaries containing proper nouns in multiple languages.
+
+    Returns:
+    - List of tuples (proper_noun_id, start_position, end_position).
+    """
+    matches = []
+
+    # Iterate over each entry ID and its proper nouns
+    for entry_id, proper_nouns in ALL_PROPER_NOUNS.items():
+        for lang, noun in proper_nouns.items():
+            if noun:  # Ensure the noun exists
+                # Use regex to find all occurrences of the noun in the text (case-sensitive)
+                for match in re.finditer(rf'{re.escape(noun)}', text, re.IGNORECASE):
+                    matches.append((entry_id, match.start(), match.start() + len(noun)))
+
+    # Sort by position to maintain order
+    matches.sort(key=lambda x: x[1])
+
+    return sorted(set(matches))
 
 
 if __name__ == "__main__":

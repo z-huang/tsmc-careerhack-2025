@@ -241,31 +241,31 @@ combined_dict = {0: {'proper_noun': {'Chinese': 'DDR Ratio',
                                       'English': 'Vertex AI: An integrated machine learning platform offering a full set of tools for data preparation, training, and deployment, supporting automated machine learning and custom model development.',
                                       'Japanese': 'Vertex AI: 統合された機械学習プラットフォームで、データ準備、トレーニングからデプロイまでの全ツールを提供し、自動化された機械学習とカスタムモデルの開発をサポートします。'}}}
 
-chinese_dict = {}
-german_dict = {}
-english_dict = {}
-japanese_dict = {}
-description_dict = {}
-all_proper_nouns = {}
+CHINESE_DICT = {}
+GERMAN_DICT = {}
+ENGLISH_DICT = {}
+JAPANESE_DICT = {}
+DESC_DICT = {}
+ALL_PROPER_NOUNS = {}
 # Populate each dictionary separately
 for entry_id, data in combined_dict.items():
-    description_dict[entry_id] = {
+    DESC_DICT[entry_id] = {
         "description": data["description"].get("English", "")
     }
-    chinese_dict[entry_id] = {
+    CHINESE_DICT[entry_id] = {
         "proper_noun": data["proper_noun"].get("Chinese", ""),
     }
-    german_dict[entry_id] = {
+    GERMAN_DICT[entry_id] = {
         "proper_noun": data["proper_noun"].get("German", ""),
     }
-    english_dict[entry_id] = {
+    ENGLISH_DICT[entry_id] = {
         "proper_noun": data["proper_noun"].get("English", ""),
     }
-    japanese_dict[entry_id] = {
+    JAPANESE_DICT[entry_id] = {
         "proper_noun": data["proper_noun"].get("Japanese", ""),
     }
 for entry_id in combined_dict.keys():
-    all_proper_nouns[entry_id] = {
+    ALL_PROPER_NOUNS[entry_id] = {
         "Chinese": combined_dict.get(entry_id, {}).get("proper_noun", {}).get("Chinese", ""),
         "German": combined_dict.get(entry_id, {}).get("proper_noun", {}).get("German", ""),
         "English": combined_dict.get(entry_id, {}).get("proper_noun", {}).get("English", ""),
