@@ -308,6 +308,7 @@ ul {
 
 
 /* 搜尋欄位樣式 */
+/* 搜尋欄位樣式 */
 .sidebar-search {
     display: flex;
     align-items: center;
@@ -315,12 +316,17 @@ ul {
     background-color: #202123;
     border-top: 1px solid #444;
     margin-top: auto;
+    width: calc(100% - 20px);  /* 減去左右 padding */
+    position: absolute;  /* 改為絕對定位 */
+    bottom: 10px;       /* 距離底部的距離 */
+    left: 10px;         /* 與左邊界的距離 */
 }
 
+/* 調整輸入框樣式確保彈性寬度 */
 .sidebar-search input {
     flex: 1;
+    min-width: 0;      /* 防止 flex 項目溢出 */
     height: 38px;
-    /* 固定高度 */
     padding: 8px;
     font-size: 1rem;
     background-color: #40414F;
@@ -330,20 +336,18 @@ ul {
     outline: none;
 }
 
+/* 調整按鈕樣式以配合新的布局 */
 .sidebar-search button {
     height: 38px;
-    /* 與 input 相同的高度 */
     background-color: #6ab0c4;
     border: none;
     padding: 0 15px;
-    /* 調整水平內邊距 */
     border-radius: 0 20px 20px 0;
     cursor: pointer;
     color: #ffffff;
     display: flex;
-    /* 添加這個確保內容垂直居中 */
     align-items: center;
-    /* 添加這個確保內容垂直居中 */
+    flex-shrink: 0;    /* 防止按鈕被壓縮 */
 }
 
 .sidebar-search button:hover {
