@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ChatGPT-like Dark UI</title>
+  <link rel="stylesheet" href="./transcript.css" />
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- LEFT SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>History</h2>
+      </div>
+      <hr>
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a href="#">Current Trancript</a></li>
+        </ul>
+      </nav>
+      &nbsp;
+      &nbsp;
+      &nbsp;
+      <hr>
+      <div class="sidebar-section">
+        <h3>專家</h3>
+        <ul>
+          <li><a href="#">新聞專家</a></li>
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>今天</h3>
+        <ul>
+          <li><a href="#">Template Request Clarification</a></li>
+          <li><a href="#">ChatGPT 項目開發</a></li>
+          <li><a href="#">學生研究計畫評估</a></li>
+          <li><a href="#">智慧居家採購建議</a></li>
+          <li><a href="#">160公分理想體重</a></li>
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>昨天</h3>
+        <ul>
+          <li><a href="#">CoppeliaSim OpenGL Error Fix</a></li>
+          <li><a href="#">Meeting Transcription and Summary</a></li>
+          <li><a href="#">尿頻尿急比對判斷</a></li>
+          <li><a href="#">BMW 318Ci 2004介紹</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- MAIN CHAT AREA -->
+    <div class="main-content">
+      <div class="main-header">
+        <h2>Transcript</h2>
+      </div>
+
+      <div class="prompt-container">
+        <h1>我可以為你做什麼？</h1>
+        <div class="chat-input">
+          <input 
+            type="text" 
+            id="userInput" 
+            placeholder="傳訊息給 ChatGPT" 
+          />
+          <button id="sendBtn">搜尋</button>
+        </div>
+        
+        <!-- Suggestion tags -->
+        <div class="suggestion-tags">
+          <button class="tag-btn">建立圖像</button>
+          <button class="tag-btn">制訂計畫</button>
+          <button class="tag-btn">取得建議</button>
+          <button class="tag-btn">程式碼</button>
+          <button class="tag-btn">給我個驚喜</button>
+          <button class="tag-btn">更多</button>
+        </div>
+      </div>
+
+      <div id="messageArea" class="message-area">
+        <!-- Chat-like messages can appear here if needed -->
+      </div>
+
+      <div class="footer-disclaimer">
+        <p>ChatGPT 可能包含非事實性回答，請查核重要資訊。</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="./transcript.js"></script>
+</body>
+</html>
