@@ -105,7 +105,7 @@ ul {
 }
 
 /* TOGGLE BUTTON */
-.toggle-btn {
+/* .toggle-btn {
     position: fixed;
     left: calc(16.67vw - 40px);
     top: 20px;
@@ -129,7 +129,7 @@ ul {
 
 .sidebar.collapsed~.toggle-btn {
     left: 20px;
-}
+} */
 
 /* MAIN CONTENT */
 .main-content {
@@ -432,7 +432,7 @@ ul {
 .search-popup-results {
     flex: 1;
     overflow-y: auto;
-    max-height: 150px;
+    max-height: 500px;
     /* 限制結果區域的高度 */
     padding: 10px;
     color: #ffffff;
@@ -506,3 +506,46 @@ ul {
 .language-btn .btn-icon {
     color: #ffffff;
 }
+
+
+/* BUTTON GROUP */
+.button-group {
+    position: fixed;
+    top: 20px;
+    left: calc(16.67vw - 80px); /* 預留兩個按鈕的寬度加間距 */
+    display: flex;
+    gap: 8px;
+    z-index: 1000;
+    transition: left 0.3s ease;
+}
+
+/* 當 sidebar 收起時按鈕組一起移動 */
+.sidebar.collapsed ~ .button-group {
+    left: 20px;
+}
+
+/* Common button styles */
+.new-btn,
+.toggle-btn {
+    background-color: #202123;
+    border: 1px solid #444;
+    color: #ffffff;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.new-btn {
+    font-size: 20px;
+}
+
+.new-btn:hover,
+.toggle-btn:hover {
+    background-color: #2c2d31;
+}
+

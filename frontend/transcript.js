@@ -140,4 +140,41 @@ document.addEventListener('DOMContentLoaded', function () {
 			sendChatBtn.click();
 		}
 	});
+
+	// new trascript button
+	const newTranscriptBtn = document.getElementById('newTranscriptBtn');
+	const sidebarNav = document.querySelector('.sidebar-nav ul');
+	let transcriptCount = 1;
+
+	newTranscriptBtn.addEventListener('click', function () {
+		// 1. 在側邊欄添加新的 transcript 項目
+		const newTranscriptItem = document.createElement('li');
+		const currentDate = new Date();
+		const timestamp = currentDate.toLocaleTimeString();
+		newTranscriptItem.innerHTML = `<a href="#">New Transcript ${timestamp}</a>`;
+		sidebarNav.appendChild(newTranscriptItem);
+
+		// 2. 重置主內容區域
+		const transcriptArea = document.getElementById('transcriptArea');
+		transcriptArea.innerHTML = ''; // 清空現有內容
+
+		// 3. 重置輸入區域和其他元素到默認狀態
+		const promptContainer = document.querySelector('.prompt-container');
+		promptContainer.querySelector('h1').textContent = 'Transcript';
+
+		// 4. 自動滾動到新建的項目
+		newTranscriptItem.scrollIntoView({ behavior: 'smooth' });
+
+		// 5. 為新項目添加視覺反饋
+		newTranscriptItem.style.animation = 'highlight 1s ease';
+	});
 });
+
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes highlight {
+        0% { background-color: #2c2d31; }
+        100% { background-color: transparent; }
+    }
+`;
+document.head.appendChild(style);
