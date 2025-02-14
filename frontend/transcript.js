@@ -179,49 +179,70 @@ document.addEventListener('DOMContentLoaded', function () {
 	});
 
 	const newTranscriptBtn = document.getElementById('newTranscriptBtn');
-    const todayHistoryBlocks = document.querySelector('.sidebar-section .history-blocks');
-    
-    // 新增除錯訊息
-    console.log('按鈕元素:', newTranscriptBtn);
-    console.log('歷史區塊容器:', todayHistoryBlocks);
+	const todayHistoryBlocks = document.querySelector('.sidebar-section .history-blocks');
 
-    if (!newTranscriptBtn || !todayHistoryBlocks) {
-        console.error('找不到必要的 DOM 元素');
-        return;
-    }
+	// 新增除錯訊息
+	console.log('按鈕元素:', newTranscriptBtn);
+	console.log('歷史區塊容器:', todayHistoryBlocks);
 
-    newTranscriptBtn.addEventListener('click', function() {
-        // 創建新的 block
-        const newBlock = document.createElement('div');
-        newBlock.className = 'history-block';
-        
-        const currentTime = new Date().toLocaleTimeString();
-        
-        // 設置 block 內容
-        newBlock.innerHTML = `
-            <div class="title">Untitled</div>
-            <div class="timestamp">${currentTime}</div>
-        `;
-        
-        // 插入新區塊到最上方
-        if (todayHistoryBlocks.firstChild) {
-            todayHistoryBlocks.insertBefore(newBlock, todayHistoryBlocks.firstChild);
-        } else {
-            todayHistoryBlocks.appendChild(newBlock);
-        }
+	if (!newTranscriptBtn || !todayHistoryBlocks) {
+		console.error('找不到必要的 DOM 元素');
+		return;
+	}
 
-        // 添加點擊效果
-        newBlock.addEventListener('click', function() {
-            const transcriptArea = document.getElementById('transcriptArea');
-            transcriptArea.innerHTML = '';
-            
-            const promptContainer = document.querySelector('.prompt-container');
-            promptContainer.querySelector('h1').textContent = 'Untitled';
-        });
+	newTranscriptBtn.addEventListener('click', function () {
+		const newBlock = document.createElement('div');
+		newBlock.className = 'history-block';
 
-        // 添加動畫
-        newBlock.style.animation = 'highlight 1s ease';
-    });
+		const currentTime = new Date().toLocaleTimeString();
+
+		// 修改 block 內容結構
+		newBlock.innerHTML = `
+			<div class="history-content">
+				<div class="title">Untitled</div>
+				<div class="timestamp">${currentTime}</div>
+			</div>
+			<div class="history-menu-btn">⋮</div>
+			<div class="history-menu">
+				<div class="history-menu-item">Rename</div>
+				<div class="history-menu-item">Delete</div>
+			</div>
+		`;
+
+		// 添加選單點擊事件
+		const menuBtn = newBlock.querySelector('.history-menu-btn');
+		const menu = newBlock.querySelector('.history-menu');
+
+		menuBtn.addEventListener('click', function (e) {
+			e.stopPropagation(); // 防止觸發 block 的點擊事件
+			menu.classList.toggle('show');
+		});
+
+		// 點擊其他地方時關閉選單
+		document.addEventListener('click', function (e) {
+			if (!menu.contains(e.target) && !menuBtn.contains(e.target)) {
+				menu.classList.remove('show');
+			}
+		});
+
+		// 將新區塊插入到容器中
+		if (todayHistoryBlocks.firstChild) {
+			todayHistoryBlocks.insertBefore(newBlock, todayHistoryBlocks.firstChild);
+		} else {
+			todayHistoryBlocks.appendChild(newBlock);
+		}
+
+		// 添加點擊事件和動畫效果
+		newBlock.addEventListener('click', function () {
+			const transcriptArea = document.getElementById('transcriptArea');
+			transcriptArea.innerHTML = '';
+
+			const promptContainer = document.querySelector('.prompt-container');
+			promptContainer.querySelector('h1').textContent = 'Untitled';
+		});
+
+		newBlock.style.animation = 'highlight 1s ease';
+	});
 
 
 	// termination blocks
