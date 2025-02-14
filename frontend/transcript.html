@@ -14,7 +14,7 @@
         <!-- LEFT SIDEBAR -->
         <div class="sidebar" id="leftsidebar">
             <div class="sidebar-header">
-                <h2>History</h2>
+                <h2 data-i18n="history">History</h2>
             </div>
             <hr>
 
@@ -42,7 +42,7 @@
             <!-- SEARCH RESULT POPUP (NOW ABOVE SEARCH BAR) -->
             <div id="searchPopup" class="search-popup">
                 <div class="search-popup-header">
-                    <h3>搜尋結果</h3>
+                    <h3 data-i18n="search_results">Search Results</h3>
                     <button class="close-btn" id="closeSearchBtn">×</button>
                 </div>
                 <div class="search-popup-results" id="searchResults">
@@ -52,7 +52,7 @@
 
             <!-- SEARCH BAR -->
             <div class="sidebar-search">
-                <input type="text" id="searchInput" placeholder="Search..." />
+                <input type="text" id="searchInput" placeholder="Search..."  data-i18n-placeholder="search_placeholder">
                 <button id="searchBtn">🔍</button>
             </div>
 
@@ -61,7 +61,7 @@
 
         <div class="sidebar" id="rightsidebar">
             <div class="sidebar-header">
-                <h2>Terminology</h2>
+                <h2 data-i18n="terminology">Terminology</h2>
             </div>
             <hr>
             <div class="terminology-list">
@@ -99,23 +99,23 @@
         <!-- MAIN CHAT AREA -->
         <div class="main-content" id="mainContent">
             <div class="main-header">
-                <h2>Transcript</h2>
+                <h2 data-i18n="transcript">Transcript</h2>
             </div>
 
             <div class="prompt-container">
-                <h1>Transcript</h1>
+                <h1 data-i18n="transcript">Transcript</h1>
                 <div class="action-buttons">
                     <button class="action-btn record-btn">
                         <span class="btn-icon">●</span>
-                        Record
+                        <span data-i18n="record">Record</span>
                     </button>
                     <button class="action-btn upload-btn">
                         <span class="btn-icon">↑</span>
-                        Upload
+                        <span data-i18n="upload">Upload</span>
                     </button>
                     <button class="action-btn chat-btn" id="chatBtn">
                         <span class="btn-icon">💬</span>
-                        Chat
+                        <span data-i18n="chat">Chat</span>
                     </button>
                     <div class="dropdown">
                         <button class="action-btn language-btn">

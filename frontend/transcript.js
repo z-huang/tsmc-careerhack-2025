@@ -1,4 +1,36 @@
 document.addEventListener('DOMContentLoaded', function () {
+
+    // Load translations from JSON file
+    function loadTranslations(lang) {
+        fetch('./translations.json')
+            .then(response => response.json())
+            .then(data => {
+                if (data[lang]) {
+                    applyTranslations(data[lang]);
+                }
+            })
+            .catch(error => console.error('Error loading translations:', error));
+    }
+
+    // Apply translations to UI elements
+    function applyTranslations(translations) {
+        // Update elements with data-i18n
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[key]) {
+                el.textContent = translations[key];
+            }
+        });
+
+        // Update placeholders
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (translations[key]) {
+                el.setAttribute('placeholder', translations[key]);
+            }
+        });
+    }
+
 	const sidebar = document.getElementById('leftsidebar');
 	const mainContent = document.getElementById('mainContent');
 	const toggleBtn = document.getElementById('toggleSidebar');
@@ -8,7 +40,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// drop down list for "Language" button
 	const dropdownLinks = document.querySelectorAll('.dropdown-content a');
+    const languageBtn = document.querySelector('.language-btn');
 	let currentLang = 'zh'; // 設置默認語言為中文
+
+    loadTranslations(currentLang);
 
 	// 添加 active 類到默認語言選項
 	dropdownLinks.forEach(link => {
@@ -29,6 +64,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			// 更新按鈕文字
 			const languageBtn = document.querySelector('.language-btn');
 			languageBtn.innerHTML = `<span class="btn-icon">🌐</span> ${e.target.textContent}`;
+
+            loadTranslations(currentLang);
 
 			// 這裡可以添加語言切換的具體邏輯
 			console.log(`Language changed to: ${selectedLang}`);
