@@ -48,6 +48,24 @@
           <li><a href="#">BMW 318Ci 2004介紹</a></li>
         </ul>
       </div>
+      <!-- SEARCH RESULT POPUP (NOW ABOVE SEARCH BAR) -->
+    <div id="searchPopup" class="search-popup">
+        <div class="search-popup-header">
+        <h3>搜尋結果</h3>
+        <button class="close-btn" id="closeSearchBtn">×</button>
+        </div>
+        <div class="search-popup-results" id="searchResults">
+        <!-- 搜尋結果將顯示於此 -->
+        </div>
+    </div>
+    
+    <!-- SEARCH BAR -->
+    <div class="sidebar-search">
+        <input type="text" id="searchInput" placeholder="搜尋..." />
+        <button id="searchBtn">🔍</button>
+    </div>
+  
+        
     </div>
 
     <div class="sidebar" id="rightsidebar">
@@ -73,7 +91,7 @@
         <div class="action-buttons">
           <button class="action-btn record-btn">
             <span class="btn-icon">●</span>
-            Real-time
+            Record
           </button>
           <button class="action-btn upload-btn">
             <span class="btn-icon">↑</span>

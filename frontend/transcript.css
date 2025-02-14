@@ -166,7 +166,7 @@ ul {
 }
 
 .prompt-container h1 {
-  font-size: 5rem;
+  font-size: 4.9rem;
   font-weight: 600;
   margin-bottom:   0px;
   text-align: center;
@@ -330,3 +330,120 @@ ul {
 .transcript-area::-webkit-scrollbar-thumb:hover {
   background: #777;
 }
+
+/* 搜尋欄位樣式 */
+.sidebar-search {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #202123;
+    border-top: 1px solid #444;
+    margin-top: auto;
+  }
+  
+  .sidebar-search input {
+    flex: 1;
+    padding: 8px;
+    font-size: 1rem;
+    background-color: #40414F;
+    color: #ffffff;
+    border: 1px solid #555;
+    border-radius: 20px 0 0 20px;
+    outline: none;
+  }
+  
+  .sidebar-search button {
+    background-color: #00b29e;
+    border: none;
+    padding: 10px 12px;
+    border-radius: 0 20px 20px 0;
+    cursor: pointer;
+    color: #ffffff;
+  }
+  
+  .sidebar-search button:hover {
+    background-color: #008f87;
+  }
+  
+  /* 🔥 搜尋結果的彈出視窗 (顯示在搜尋欄上方) */
+  .search-popup {
+    position: absolute;
+    bottom: 80px; /* 讓它出現在搜尋欄上方 */
+    left: 10;
+    width: calc(100% - 40px); /* 與 sidebar 同寬 */
+    background-color: #2c2d31;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    transform: translateY(10px);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 10;
+    padding: 10px;
+    border: 1px solid #555;
+  }
+  
+  /* 🔥 搜尋結果顯示時 */
+  .search-popup.show {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  /* 搜尋結果標題 */
+  .search-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #444;
+  }
+  
+  .search-popup-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 5px;
+  }
+  
+  .search-popup-results {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 150px; /* 限制結果區域的高度 */
+    padding: 10px;
+    color: #ffffff;
+    font-size: 0.9rem;
+  }
+  
+  .search-popup-results ul {
+    padding: 0;
+    margin: 0;
+  }
+  
+  .search-popup-results li {
+    list-style: none;
+    padding: 5px 0;
+    border-bottom: 1px solid #444;
+  }
+  
+  .search-popup-results li a {
+    color: #ffffff;
+    text-decoration: none;
+    display: block;
+  }
+  
+  .search-popup-results li a:hover {
+    color: #00b29e;
+  }
+  
+  

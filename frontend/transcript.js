@@ -32,6 +32,49 @@ document.addEventListener('DOMContentLoaded', function () {
     chatPopup.classList.remove('show');
   });
 
+  const searchInput = document.getElementById('searchInput');
+  const searchBtn = document.getElementById('searchBtn');
+  const searchPopup = document.getElementById('searchPopup');
+  const closeSearchBtn = document.getElementById('closeSearchBtn');
+  const searchResults = document.getElementById('searchResults');
+
+  function toggleSearchPopup() {
+    searchPopup.classList.toggle('show');
+  }
+
+  // 監聽搜尋按鈕點擊事件
+  searchBtn.addEventListener('click', () => {
+    const query = searchInput.value.trim();
+    if (!query) return;
+
+    // 模擬搜尋結果
+    searchResults.innerHTML = `
+      <div>🔎 搜尋關鍵字: <strong>${query}</strong></div>
+      <div>📄 找到 3 個相關結果：</div>
+      <ul>
+        <li>📜 <a href="#">搜尋結果 1</a></li>
+        <li>📜 <a href="#">搜尋結果 2</a></li>
+        <li>📜 <a href="#">搜尋結果 3</a></li>
+      </ul>
+    `;
+
+    // 顯示搜尋結果彈出視窗
+    toggleSearchPopup();
+  });
+
+  // 關閉搜尋視窗
+  closeSearchBtn.addEventListener('click', () => {
+    searchPopup.classList.remove('show');
+  });
+
+  // 監聽 Enter 鍵進行搜尋
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      searchBtn.click();
+    }
+  });
+
   // Chat functionality
   const chatInput = document.getElementById('chatInput');
   const sendChatBtn = document.getElementById('sendChatBtn');
