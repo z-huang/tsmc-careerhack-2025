@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	// drop down list for "Language" button
 	const dropdownLinks = document.querySelectorAll('.dropdown-content a');
 	const languageBtn = document.querySelector('.language-btn');
-	let currentLang = 'zh'; // 設置默認語言為中文
+	let currentLang = 'cmn-Hant-TW'; // 設置默認語言為中文
 
 	loadTranslations(currentLang);
 

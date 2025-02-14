@@ -1,5 +1,5 @@
 {
-  "zh": {
+  "cmn-Hant-TW": {
       "history": "歷史",
       "transcript": "文字記錄",
       "terminology": "術語",
@@ -12,7 +12,7 @@
       "chat_placeholder": "輸入你的訊息...",
       "send": "發送"
   },
-  "en": {
+  "en-US": {
       "history": "History",
       "transcript": "Transcript",
       "terminology": "Terminology",
@@ -25,7 +25,7 @@
       "chat_placeholder": "Type your message...",
       "send": "Send"
   },
-  "ja": {
+  "ja-JP": {
       "history": "履歴",
       "transcript": "トランスクリプト",
       "terminology": "用語",
@@ -38,7 +38,7 @@
       "chat_placeholder": "メッセージを入力してください...",
       "send": "送信"
   },
-  "de": {
+  "de-DE": {
       "history": "Verlauf",
       "transcript": "Transkript",
       "terminology": "Begriffe",
