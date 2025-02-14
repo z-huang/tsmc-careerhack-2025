@@ -1,35 +1,35 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    // Load translations from JSON file
-    function loadTranslations(lang) {
-        fetch('./translations.json')
-            .then(response => response.json())
-            .then(data => {
-                if (data[lang]) {
-                    applyTranslations(data[lang]);
-                }
-            })
-            .catch(error => console.error('Error loading translations:', error));
-    }
+	// Load translations from JSON file
+	function loadTranslations(lang) {
+		fetch('./translations.json')
+			.then(response => response.json())
+			.then(data => {
+				if (data[lang]) {
+					applyTranslations(data[lang]);
+				}
+			})
+			.catch(error => console.error('Error loading translations:', error));
+	}
 
-    // Apply translations to UI elements
-    function applyTranslations(translations) {
-        // Update elements with data-i18n
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if (translations[key]) {
-                el.textContent = translations[key];
-            }
-        });
+	// Apply translations to UI elements
+	function applyTranslations(translations) {
+		// Update elements with data-i18n
+		document.querySelectorAll('[data-i18n]').forEach(el => {
+			const key = el.getAttribute('data-i18n');
+			if (translations[key]) {
+				el.textContent = translations[key];
+			}
+		});
 
-        // Update placeholders
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-            const key = el.getAttribute('data-i18n-placeholder');
-            if (translations[key]) {
-                el.setAttribute('placeholder', translations[key]);
-            }
-        });
-    }
+		// Update placeholders
+		document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+			const key = el.getAttribute('data-i18n-placeholder');
+			if (translations[key]) {
+				el.setAttribute('placeholder', translations[key]);
+			}
+		});
+	}
 
 	const sidebar = document.getElementById('leftsidebar');
 	const mainContent = document.getElementById('mainContent');
@@ -40,10 +40,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// drop down list for "Language" button
 	const dropdownLinks = document.querySelectorAll('.dropdown-content a');
-    const languageBtn = document.querySelector('.language-btn');
+	const languageBtn = document.querySelector('.language-btn');
 	let currentLang = 'zh'; // 設置默認語言為中文
 
-    loadTranslations(currentLang);
+	loadTranslations(currentLang);
 
 	// 添加 active 類到默認語言選項
 	dropdownLinks.forEach(link => {
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			const languageBtn = document.querySelector('.language-btn');
 			languageBtn.innerHTML = `<span class="btn-icon">🌐</span> ${e.target.textContent}`;
 
-            loadTranslations(currentLang);
+			loadTranslations(currentLang);
 
 			// 這裡可以添加語言切換的具體邏輯
 			console.log(`Language changed to: ${selectedLang}`);
@@ -178,45 +178,63 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 	});
 
-	// new trascript button
 	const newTranscriptBtn = document.getElementById('newTranscriptBtn');
-	const sidebarNav = document.querySelector('.sidebar-nav ul');
-	let transcriptCount = 1;
+    const todayHistoryBlocks = document.querySelector('.sidebar-section .history-blocks');
+    
+    // 新增除錯訊息
+    console.log('按鈕元素:', newTranscriptBtn);
+    console.log('歷史區塊容器:', todayHistoryBlocks);
 
-	newTranscriptBtn.addEventListener('click', function () {
-		// 1. 在側邊欄添加新的 transcript 項目
-		const newTranscriptItem = document.createElement('li');
-		const currentDate = new Date();
-		const timestamp = currentDate.toLocaleTimeString();
-		newTranscriptItem.innerHTML = `<a href="#">New Transcript ${timestamp}</a>`;
-		sidebarNav.appendChild(newTranscriptItem);
+    if (!newTranscriptBtn || !todayHistoryBlocks) {
+        console.error('找不到必要的 DOM 元素');
+        return;
+    }
 
-		// 2. 重置主內容區域
-		const transcriptArea = document.getElementById('transcriptArea');
-		transcriptArea.innerHTML = ''; // 清空現有內容
+    newTranscriptBtn.addEventListener('click', function() {
+        // 創建新的 block
+        const newBlock = document.createElement('div');
+        newBlock.className = 'history-block';
+        
+        const currentTime = new Date().toLocaleTimeString();
+        
+        // 設置 block 內容
+        newBlock.innerHTML = `
+            <div class="title">Untitled</div>
+            <div class="timestamp">${currentTime}</div>
+        `;
+        
+        // 插入新區塊到最上方
+        if (todayHistoryBlocks.firstChild) {
+            todayHistoryBlocks.insertBefore(newBlock, todayHistoryBlocks.firstChild);
+        } else {
+            todayHistoryBlocks.appendChild(newBlock);
+        }
 
-		// 3. 重置輸入區域和其他元素到默認狀態
-		const promptContainer = document.querySelector('.prompt-container');
-		promptContainer.querySelector('h1').textContent = 'Transcript';
+        // 添加點擊效果
+        newBlock.addEventListener('click', function() {
+            const transcriptArea = document.getElementById('transcriptArea');
+            transcriptArea.innerHTML = '';
+            
+            const promptContainer = document.querySelector('.prompt-container');
+            promptContainer.querySelector('h1').textContent = 'Untitled';
+        });
 
-		// 4. 自動滾動到新建的項目
-		newTranscriptItem.scrollIntoView({ behavior: 'smooth' });
+        // 添加動畫
+        newBlock.style.animation = 'highlight 1s ease';
+    });
 
-		// 5. 為新項目添加視覺反饋
-		newTranscriptItem.style.animation = 'highlight 1s ease';
-	});
-	
+
 	// termination blocks
 	const termBlocks = document.querySelectorAll('.term-block');
-    
-    termBlocks.forEach(block => {
-        const header = block.querySelector('.term-header');
-        
-        header.addEventListener('click', () => {
-            // 切換當前區塊的展開狀態
-            block.classList.toggle('expanded');
-        });
-    });
+
+	termBlocks.forEach(block => {
+		const header = block.querySelector('.term-header');
+
+		header.addEventListener('click', () => {
+			// 切換當前區塊的展開狀態
+			block.classList.toggle('expanded');
+		});
+	});
 });
 
 const style = document.createElement('style');
@@ -227,3 +245,4 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+

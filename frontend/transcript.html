@@ -18,27 +18,15 @@
             </div>
             <hr>
 
-
             <div class="sidebar-section">
                 <h3>今天</h3>
-                <ul>
-                    <li><a href="#">Template Request Clarification</a></li>
-                    <li><a href="#">ChatGPT 項目開發</a></li>
-                    <li><a href="#">學生研究計畫評估</a></li>
-                    <li><a href="#">智慧居家採購建議</a></li>
-                    <li><a href="#">160公分理想體重</a></li>
-                </ul>
+                <!-- 重要：要有這個容器來接收新增的 blocks -->
+                <div class="history-blocks">
+
+                </div>
             </div>
 
-            <div class="sidebar-section">
-                <h3>昨天</h3>
-                <ul>
-                    <li><a href="#">CoppeliaSim OpenGL Error Fix</a></li>
-                    <li><a href="#">Meeting Transcription and Summary</a></li>
-                    <li><a href="#">尿頻尿急比對判斷</a></li>
-                    <li><a href="#">BMW 318Ci 2004介紹</a></li>
-                </ul>
-            </div>
+
             <!-- SEARCH RESULT POPUP (NOW ABOVE SEARCH BAR) -->
             <div id="searchPopup" class="search-popup">
                 <div class="search-popup-header">
@@ -52,7 +40,7 @@
 
             <!-- SEARCH BAR -->
             <div class="sidebar-search">
-                <input type="text" id="searchInput" placeholder="Search..."  data-i18n-placeholder="search_placeholder">
+                <input type="text" id="searchInput" placeholder="Search..." data-i18n-placeholder="search_placeholder">
                 <button id="searchBtn">🔍</button>
             </div>
 
@@ -146,7 +134,8 @@
                     <!-- Chat messages will appear here -->
                 </div>
                 <div class="chat-popup-input">
-                    <input type="text" placeholder="Type your message..." data-i18n-placeholder="chat_placeholder" id="chatInput">
+                    <input type="text" placeholder="Type your message..." data-i18n-placeholder="chat_placeholder"
+                        id="chatInput">
                     <button id="sendChatBtn" style="font-size: 20px">➤</button>
                 </div>
             </div>
