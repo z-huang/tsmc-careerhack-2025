@@ -51,11 +51,11 @@
     </div>
 
     <div class="sidebar" id="rightsidebar">
-        <div class="sidebar-header">
-            <h2>Terminology</h2>
-        </div>
-        <hr>
-        
+      <div class="sidebar-header">
+        <h2>Terminology</h2>
+      </div>
+      <hr>
+
     </div>
 
     <button class="toggle-btn" id="toggleSidebar">
@@ -69,28 +69,43 @@
       </div>
 
       <div class="prompt-container">
-        <h1>我可以為你做什麼？</h1>
-        <div class="chat-input">
-          <input type="text" id="userInput" placeholder="傳訊息給 ChatGPT" />
-          <button id="sendBtn">搜尋</button>
-        </div>
-
-        <!-- Suggestion tags -->
-        <div class="suggestion-tags">
-          <button class="tag-btn">建立圖像</button>
-          <button class="tag-btn">制訂計畫</button>
-          <button class="tag-btn">取得建議</button>
-          <button class="tag-btn">程式碼</button>
-          <button class="tag-btn">給我個驚喜</button>
-          <button class="tag-btn">更多</button>
+        <h1>Transcript</h1>
+        <div class="action-buttons">
+          <button class="action-btn record-btn">
+            <span class="btn-icon">●</span>
+            Real-time
+          </button>
+          <button class="action-btn upload-btn">
+            <span class="btn-icon">↑</span>
+            Upload
+          </button>
+          <button class="action-btn chat-btn" id="chatBtn">
+            <span class="btn-icon">💬</span>
+            Chat
+          </button>
         </div>
       </div>
 
-      <div id="messageArea" class="message-area">
-        <!-- Chat-like messages can appear here if needed -->
+      <div id="transcriptArea" class="transcript-area">
+        <!-- Transcript content will appear here -->
       </div>
 
+      <!-- Chat popup -->
+      <div id="chatPopup" class="chat-popup">
+        <div class="chat-popup-header">
+          <h3>Chat Assistant</h3>
+          <button class="close-btn" id="closeChatBtn">×</button>
+        </div>
+        <div class="chat-popup-messages" id="chatMessages">
+          <!-- Chat messages will appear here -->
+        </div>
+        <div class="chat-popup-input">
+          <input type="text" placeholder="Type your message..." id="chatInput">
+          <button id="sendChatBtn">Send</button>
+        </div>
+      </div>
     </div>
+
   </div>
 
   <script src="./transcript.js"></script>
