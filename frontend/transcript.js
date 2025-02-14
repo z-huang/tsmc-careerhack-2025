@@ -236,9 +236,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		newBlock.addEventListener('click', function () {
 			const transcriptArea = document.getElementById('transcriptArea');
 			transcriptArea.innerHTML = '';
-
-			const promptContainer = document.querySelector('.prompt-container');
-			promptContainer.querySelector('h1').textContent = 'Untitled';
 		});
 
 		newBlock.style.animation = 'highlight 1s ease';
