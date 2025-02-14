@@ -1,6 +1,6 @@
 // Sidebar toggle functionality
 document.addEventListener('DOMContentLoaded', function () {
-  const sidebar = document.getElementById('sidebar');
+  const sidebar = document.getElementById('leftsidebar');
   const mainContent = document.getElementById('mainContent');
   const toggleBtn = document.getElementById('toggleSidebar');
 
