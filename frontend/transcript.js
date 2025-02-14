@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			languageBtn.innerHTML = `<span class="btn-icon">🌐</span> ${e.target.textContent}`;
 
 			try {
-                const response = await fetch('/set_language', {
+                const response = await fetch('http://10.0.0.5:8000/set_language', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ language: currentLang })
