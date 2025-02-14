@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from database import get_db
 from pydub import AudioSegment
-from models import Meeting, MeetingContent
+from models import Meeting, MeetingContent, Settings
 import gemini
 
 app = FastAPI()
@@ -13,6 +13,10 @@ app = FastAPI()
 class TranslateInput(BaseModel):
     text: str
     target_lang: str
+
+
+class SetLanguageInput(BaseModel):
+    language: str
 
 
 @app.post("/translate")
@@ -94,3 +98,24 @@ async def get_content(meeting_id: str, db: Session = Depends(get_db)):
         }
         for m in meeting
     ]
+
+
+@app.get("/get_language")
+async def get_language(db: Session = Depends(get_db)):
+    setting = db.query(Settings).filter(Settings.key == "language").first()
+    if not setting:
+        raise HTTPException(status_code=404, detail="Language setting not found")
+    return {"result": setting.value}
+
+
+@app.post("/set_language")
+async def set_language(input_data: SetLanguageInput, db: Session = Depends(get_db)):
+    setting = db.query(Settings).filter(Settings.key == "language").first()
+    if setting:
+        setting.value = input_data.language
+    else:
+        setting = Settings(key="language", value=input_data.language)
+        db.add(setting)
+
+    db.commit()
+    return {"success": True}

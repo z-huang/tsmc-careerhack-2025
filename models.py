@@ -4,6 +4,13 @@ from sqlalchemy.orm import relationship
 from database import engine, Base
 
 
+class Settings(Base):
+    __tablename__ = 'settings'
+    setting_id = Column(Integer, primary_key=True, autoincrement=True)
+    key = Column(String, unique=True, nullable=False, index=True)
+    value = Column(String, nullable=False)
+
+
 class Meeting(Base):
     __tablename__ = 'meetings'
     meeting_id = Column(String, primary_key=True, index=True)
