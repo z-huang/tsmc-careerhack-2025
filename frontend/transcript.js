@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			link.classList.add('active');
 		}
 
-		link.addEventListener('click', (e) => {
+		link.addEventListener('click', async(e) => {
 			e.preventDefault();
 			const selectedLang = e.target.getAttribute('data-lang');
 			currentLang = selectedLang;
@@ -65,7 +65,23 @@ document.addEventListener('DOMContentLoaded', function () {
 			const languageBtn = document.querySelector('.language-btn');
 			languageBtn.innerHTML = `<span class="btn-icon">🌐</span> ${e.target.textContent}`;
 
-			loadTranslations(currentLang);
+			try {
+                const response = await fetch('/set_language', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ language: currentLang })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    console.log(`Language changed to: ${selectedLang}`);
+                    loadTranslations(currentLang);
+                } else {
+                    console.error("Failed to set language on the server.");
+                }
+            } catch (error) {
+                console.error('Error setting language:', error);
+            }
 
 			// 這裡可以添加語言切換的具體邏輯
 			console.log(`Language changed to: ${selectedLang}`);
