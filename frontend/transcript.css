@@ -246,8 +246,10 @@ ul {
 }
 
 .chat-popup-header h3 {
+  font-size: 1.3rem;
+  font-weight: 450;
+  margin-bottom:   0px;
   margin: 0;
-  font-size: 1rem;
 }
 
 .close-btn {
