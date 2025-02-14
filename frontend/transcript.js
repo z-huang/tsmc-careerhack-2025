@@ -168,6 +168,18 @@ document.addEventListener('DOMContentLoaded', function () {
 		// 5. 為新項目添加視覺反饋
 		newTranscriptItem.style.animation = 'highlight 1s ease';
 	});
+	
+	// termination blocks
+	const termBlocks = document.querySelectorAll('.term-block');
+    
+    termBlocks.forEach(block => {
+        const header = block.querySelector('.term-header');
+        
+        header.addEventListener('click', () => {
+            // 切換當前區塊的展開狀態
+            block.classList.toggle('expanded');
+        });
+    });
 });
 
 const style = document.createElement('style');

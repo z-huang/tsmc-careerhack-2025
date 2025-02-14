@@ -549,3 +549,59 @@ ul {
     background-color: #2c2d31;
 }
 
+/* TERMINOLOGY STYLES */
+.terminology-list {
+    margin-top: 20px;
+}
+
+.term-block {
+    background-color: #2c2d31;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.term-header {
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.term-header:hover {
+    background-color: #383942;
+}
+
+.term {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.toggle-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.term-block.expanded .toggle-icon {
+    transform: rotate(45deg);
+}
+
+.term-definition {
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background-color: #383942;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    opacity: 0;
+}
+
+.term-block.expanded .term-definition {
+    padding: 15px;
+    max-height: 500px;
+    opacity: 1;
+}
