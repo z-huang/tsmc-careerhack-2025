@@ -246,16 +246,20 @@ def correct_keywords(s: str):
 
         "**Ensure that the output is strictly just the corrected text with no extra formatting or explanations!**"
     )
+    match = None
+    extracted = ""
+    while match is None:
+        response = model.generate_content(
+            [prompt],
+            generation_config=generation_config,
+            safety_settings=safety_settings,
+        )
 
-    response = model.generate_content(
-        [prompt],
-        generation_config=generation_config,
-        safety_settings=safety_settings,
-    )
+        match = re.search(r"\*\*Corrected Text:\*\*\n(.+)", response.text, re.DOTALL)
+        if match:
+            extracted = match.group(1)
 
-    match = re.search(r"\*\*Corrected Text:\*\*\n(.+)", response.text, re.DOTALL)
-    extracted = match.group(1)
-    return extracted
+    return extracted.rstrip('\n')
 
 
 def find_keywords(text) -> List[Tuple[int, int, int]]:

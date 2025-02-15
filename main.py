@@ -1,4 +1,5 @@
 import io
+import math
 from fastapi import FastAPI, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -39,42 +40,58 @@ HOP_SIZE = 2000
 async def transcript(websocket: WebSocket):
     await websocket.accept()
     audio_data = b''
+
+    seg_i = 0
+
     processed_time = 0
-    block_start_time = 0
     block_text = ''
-    block_id = 0
+    block_i = 0
 
     try:
         while True:
             audio_data += await websocket.receive_bytes()
             audio = AudioSegment.from_file(io.BytesIO(audio_data), format='webm')
-            silences = detect_silence(audio, min_silence_len=500, silence_thresh=-40)
-            if silences and block_start_time < silences[-1][0]:
-                block_start_time = silences[-1][1]
-                if block_text:
-                    block_text = ''
-                    block_id += 1
+            silences = [
+                [0, 0]] + detect_silence(audio, min_silence_len=1000, silence_thresh=-40) + [[math.inf, math.inf]]
+            print(silences)
 
             while len(audio) - processed_time > WIN_SIZE:
-                buffer = io.BytesIO()
-                audio[processed_time:processed_time + WIN_SIZE].export(buffer, format='mp3')
-                processed_time += HOP_SIZE
+                seg_start = silences[seg_i][1]
+                seg_end = math.inf
+                for i, (start, end) in enumerate(silences):
+                    if seg_start == end:
+                        seg_end = silences[i + 1][0]
 
-                answer, score = await gemini.speech2text(buffer.getvalue())
-                block_text = gemini.merge_text(block_text, answer, score)
-                block_text = gemini.correct_keywords(block_text)
-                await websocket.send_json({
-                    'block_id': block_id,
-                    'text': block_text,
-                    'keywords': [
-                        {
-                            'id': id,
-                            'start': start,
-                            'end': end
-                        }
-                        for id, start, end in gemini.find_keywords(block_text)
-                    ]
-                })
+                buffer = io.BytesIO()
+                start = max(seg_start, processed_time)
+                end = min(seg_end, processed_time + WIN_SIZE)
+                if end - start >= 1000:
+                    audio[start:end].export(buffer, format='mp3')
+
+                    text, confidence = await gemini.speech2text(buffer.getvalue())
+                    if confidence != -1:
+                        block_text = gemini.merge_text(block_text, text, confidence)
+                        block_text = gemini.correct_keywords(block_text)
+                        keywords = gemini.find_keywords(block_text)
+                        await websocket.send_json({
+                            'block_id': block_i,
+                            'text': block_text,
+                            'keywords': [
+                                {
+                                    'id': id,
+                                    'start': start,
+                                    'end': end
+                                }
+                                for id, start, end in keywords
+                            ]
+                        })
+
+                processed_time += HOP_SIZE
+                while processed_time >= silences[seg_i + 1][0]:
+                    seg_i += 1
+                    if block_text:
+                        block_text = ''
+                        block_i += 1
 
     except WebSocketDisconnect:
         print("Client disconnected.")
