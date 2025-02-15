@@ -162,6 +162,19 @@ async def get_meeting_contents(meeting_id: str, db: Session = Depends(get_db)):
     ]
 
 
+class ChatInput(BaseModel):
+    meeting_id: int
+    prompt: str
+
+
+@app.get("/chat")
+async def chat(input_data: ChatInput, db: Session = Depends(get_db)):
+    contents = db.query(MeetingContent).filter(
+        MeetingContent.meeting_id == input_data.meeting_id).all()
+    result = gemini.chat(contents, input_data.prompt)
+    return {"result": result}
+
+
 @app.get("/get_language")
 async def get_language(db: Session = Depends(get_db)):
     setting = db.query(Settings).filter(Settings.key == "language").first()
