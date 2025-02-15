@@ -55,7 +55,8 @@ async def transcript(websocket: WebSocket, meeting_id: int, db: Session = Depend
 
     processed_time = 0
     block_text = ''
-    block_i = 0
+    block_i = db.query(func.coalesce(func.max(MeetingContent.block_id), -1)).filter(
+        MeetingContent.meeting_id == meeting_id).scalar() + 1
 
     entry = None
 
