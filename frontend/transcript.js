@@ -269,6 +269,80 @@ document.addEventListener('DOMContentLoaded', function () {
 			block.classList.toggle('expanded');
 		});
 	});
+
+    let audioStream;
+    let mediaRecorder;
+    let ws;
+    let isRecording = false;
+
+    function startWebSocket() {
+        ws = new WebSocket('ws://localhost:8000/ws/transcript');
+        ws.onopen = () => console.log('WebSocket connected.');
+        ws.onmessage = (message) => console.log('Received from server:', message.data);
+    }
+
+    async function startStreaming() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioStream = stream;
+            
+            const audioTrack = stream.getAudioTracks()[0];
+            const audioSettings = audioTrack.getSettings();
+            console.log(`Sample Rate: ${audioSettings.sampleRate} Hz`);
+            console.log(`Channels: ${audioSettings.channelCount || "Unknown"}`);
+    
+            // Check supported MIME types
+            let mimeType = '';
+            if (MediaRecorder.isTypeSupported('audio/webm')) {
+                mimeType = 'audio/webm';
+            } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+                mimeType = 'audio/ogg';
+            } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                mimeType = 'audio/mp4'; // Safari compatibility
+            } else {
+                throw new Error("No supported audio MIME type found.");
+            }
+    
+            console.log("Using MIME Type:", mimeType);
+    
+            mediaRecorder = new MediaRecorder(stream, { mimeType });
+    
+            mediaRecorder.ondataavailable = (event) => {
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(event.data);
+                }
+            };
+    
+            mediaRecorder.start(1000); // Collect audio in 1000ms chunks
+            console.log('Streaming started...');
+        } catch (error) {
+            console.error("Error accessing microphone:", error);
+        }
+    }
+    
+
+    function stopStreaming() {
+        if (mediaRecorder) {
+            mediaRecorder.stop();
+        }
+        if (audioStream) {
+            audioStream.getTracks().forEach(track => track.stop());
+        }
+        console.log('Streaming stopped.');
+    }
+
+    const startBtn = document.getElementById('startBtn');
+    startBtn.addEventListener('click', function () {
+        if (!isRecording) {
+            startWebSocket();
+            startStreaming();
+            startBtn.innerHTML = `<span class="btn-icon">■</span> <span data-i18n="stop">Stop</span>`;
+        } else {
+            stopStreaming();
+            startBtn.innerHTML = `<span class="btn-icon">●</span> <span data-i18n="record">Record</span>`;
+        }
+        isRecording = !isRecording;
+    });
 });
 
 const style = document.createElement('style');
