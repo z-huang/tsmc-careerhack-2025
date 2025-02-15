@@ -65,12 +65,12 @@ document.addEventListener('DOMContentLoaded', function () {
 				const languageBtn = document.querySelector('.language-btn');
 				languageBtn.innerHTML = `<span class="btn-icon">🌐</span> ${e.target.textContent}`;
 
-			try {
-                const response = await fetch('http://localhost:8000/set_language', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ language: currentLang })
-                });
+				try {
+					const response = await fetch('http://localhost:8000/set_language', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ language: currentLang })
+					});
 
 					const data = await response.json();
 					if (data.success) {
@@ -166,17 +166,17 @@ document.addEventListener('DOMContentLoaded', function () {
 		sendChatBtn.addEventListener('click', async () => {
 			const text = chatInput.value.trim();
 			if (!text) return;
-		
+
 			// Display user message in chat
 			const userMsgDiv = document.createElement('div');
 			userMsgDiv.style.margin = '10px 0';
 			userMsgDiv.style.fontWeight = 'bold';
 			userMsgDiv.textContent = `User: ${text}`;
 			chatMessages.appendChild(userMsgDiv);
-		
+
 			// Clear the input field
 			chatInput.value = '';
-		
+
 			// Create a placeholder for AI response (to be updated later)
 			const aiMsgDiv = document.createElement('div');
 			aiMsgDiv.style.margin = '10px 0';
@@ -184,10 +184,10 @@ document.addEventListener('DOMContentLoaded', function () {
 			aiMsgDiv.style.fontWeight = 'bold';
 			aiMsgDiv.textContent = `AI: ... (Generating response)`;
 			chatMessages.appendChild(aiMsgDiv);
-		
+
 			// Scroll to the latest message
 			chatMessages.scrollTop = chatMessages.scrollHeight;
-		
+
 			try {
 				// Send user input to the backend API
 				const response = await fetch('http://localhost:8000/chat', { // Adjust the API URL
@@ -198,10 +198,10 @@ document.addEventListener('DOMContentLoaded', function () {
 						prompt: text
 					}),
 				});
-		
+
 				const responseData = await response.json();
 				// console.log("API Response:", responseData); 
-		
+
 				if (responseData && responseData.result) {
 					aiMsgDiv.textContent = `AI: ${responseData.result}`;
 				} else {
@@ -211,11 +211,11 @@ document.addEventListener('DOMContentLoaded', function () {
 				console.error("Error fetching AI response:", error);
 				aiMsgDiv.textContent = `AI: (Failed to retrieve response)`;
 			}
-		
+
 			// Scroll again after response is updated
 			chatMessages.scrollTop = chatMessages.scrollHeight;
 		});
-    
+
 
 		// Press Enter to send chat message
 		chatInput.addEventListener('keypress', (e) => {
@@ -316,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				const data = JSON.parse(message.data);
 				const text = data.text;
 				const id = data.block_id;
-			
+
 				const chatMessages = document.getElementById('transcriptArea');
 
 				// Check if a message with the same block_id already exists
@@ -335,18 +335,18 @@ document.addEventListener('DOMContentLoaded', function () {
 					// Append the new message to the chat area
 					chatMessages.appendChild(serverMsgDiv);
 				}
-			
+
 				// Auto-scroll to the latest message
 				chatMessages.scrollTop = chatMessages.scrollHeight;
 			};
-			
+
 		}
 
 		async function startStreaming() {
 			try {
 				const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 				audioStream = stream;
-				
+
 				const audioTrack = stream.getAudioTracks()[0];
 				const audioSettings = audioTrack.getSettings();
 				console.log(`Sample Rate: ${audioSettings.sampleRate} Hz`);
@@ -379,37 +379,79 @@ document.addEventListener('DOMContentLoaded', function () {
 		/*set*/
 
 		const startBtn = document.getElementById('startBtn');
+		// startBtn.addEventListener('click', function () {
+		// 	if (!isRecording) {
+		// 		startWebSocket();
+		// 		startStreaming();
+		// 		startBtn.innerHTML = `<span class="btn-icon">■</span> <span data-i18n="stop">Stop</span>`;
+		// 	} else {
+		//         stopStreaming();
+		//         setTimeout(function() {
+		//             ws.close();
+		//         }, 5000);
+
+		// 		startBtn.innerHTML = `<span class="btn-icon">●</span> <span data-i18n="record">Record</span>`;
+		// 	}
+		// 	isRecording = !isRecording;
+		// });
+		// 首先在全域變數區域添加一個變數來儲存當前的翻譯
+		let currentTranslations = {};
+
+		// 修改 loadTranslations 函數
+		function loadTranslations(lang) {
+			fetch('./translations.json')
+				.then(response => response.json())
+				.then(data => {
+					if (data[lang]) {
+						currentTranslations = data[lang]; // 儲存當前翻譯
+						applyTranslations(data[lang]);
+						// 更新錄音按鈕的狀態
+						updateRecordButtonText(isRecording);
+					}
+				})
+				.catch(error => console.error('Error loading translations:', error));
+		}
+
+		// 新增一個更新錄音按鈕文字的函數
+		function updateRecordButtonText(isRecording) {
+			const startBtn = document.getElementById('startBtn');
+			if (isRecording) {
+				startBtn.innerHTML = `<span class="btn-icon">■</span> <span data-i18n="stop">${currentTranslations.stop}</span>`;
+			} else {
+				startBtn.innerHTML = `<span class="btn-icon">●</span> <span data-i18n="record">${currentTranslations.record}</span>`;
+			}
+		}
+
+		// 修改錄音按鈕的點擊事件處理
 		startBtn.addEventListener('click', function () {
 			if (!isRecording) {
 				startWebSocket();
 				startStreaming();
-				startBtn.innerHTML = `<span class="btn-icon">■</span> <span data-i18n="stop">Stop</span>`;
 			} else {
-                stopStreaming();
-                setTimeout(function() {
-                    ws.close();
-                }, 5000);
-                
-				startBtn.innerHTML = `<span class="btn-icon">●</span> <span data-i18n="record">Record</span>`;
+				stopStreaming();
+				setTimeout(function () {
+					ws.close();
+				}, 5000);
 			}
 			isRecording = !isRecording;
+			updateRecordButtonText(isRecording);
 		});
 	}
 	const initializeDemo = () => {
 		const trainingBlock = document.getElementById('training-wav');
 		const transcriptArea = document.getElementById('transcriptArea');
 		const terminologyList = document.getElementById('terminologyList');
-	
+
 		if (trainingBlock && transcriptArea && terminologyList) {
 			let isShowing = false;  // 追蹤顯示狀態
-	
-			trainingBlock.addEventListener('click', function(e) {
+
+			trainingBlock.addEventListener('click', function (e) {
 				// 忽略選單點擊
-				if (e.target.classList.contains('history-menu-btn') || 
+				if (e.target.classList.contains('history-menu-btn') ||
 					e.target.closest('.history-menu')) {
 					return;
 				}
-	
+
 				if (!isShowing) {
 					// 第一次點擊：顯示內容
 					transcriptArea.style.display = 'block';
@@ -429,57 +471,57 @@ document.addEventListener('DOMContentLoaded', function () {
 	initializeDemo();
 
 
-    let historyCounter = 0; // To generate unique IDs
-    let curMeetingId = 1;
+	let historyCounter = 0; // To generate unique IDs
+	let curMeetingId = 1;
 
-    const newTranscriptBtn = document.getElementById('newTranscriptBtn');
-    const todayHistoryBlocks = document.querySelector('.sidebar-section .history-blocks');
-    const transcriptArea = document.getElementById('transcriptArea');
-    const terminologyList = document.getElementById('terminologyList');
+	const newTranscriptBtn = document.getElementById('newTranscriptBtn');
+	const todayHistoryBlocks = document.querySelector('.sidebar-section .history-blocks');
+	const transcriptArea = document.getElementById('transcriptArea');
+	const terminologyList = document.getElementById('terminologyList');
 
-    if (!newTranscriptBtn || !todayHistoryBlocks) {
-        console.error('找不到必要的 DOM 元素');
-        return;
-    }
+	if (!newTranscriptBtn || !todayHistoryBlocks) {
+		console.error('找不到必要的 DOM 元素');
+		return;
+	}
 
-    // Create a new history block and fetch meeting ID
-    newTranscriptBtn.addEventListener('click', async function () {
-        try {
-            // Call API to create a new meeting
-            const response = await fetch('http://localhost:8000/new_meeting', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({})
-            });
+	// Create a new history block and fetch meeting ID
+	newTranscriptBtn.addEventListener('click', async function () {
+		try {
+			// Call API to create a new meeting
+			const response = await fetch('http://localhost:8000/new_meeting', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({})
+			});
 
-            const data = await response.json();
+			const data = await response.json();
 
-            if (data && data.meeting_id) {
-                const meetingId = data.meeting_id;
-                const meetingTopic = data.topic || "Untitled Meeting";
-                const meetingDate = data.date || new Date().toISOString().split('T')[0]; // Default to today
+			if (data && data.meeting_id) {
+				const meetingId = data.meeting_id;
+				const meetingTopic = data.topic || "Untitled Meeting";
+				const meetingDate = data.date || new Date().toISOString().split('T')[0]; // Default to today
 
-                console.log(`New Meeting Created - ID: ${meetingId}, Topic: ${meetingTopic}, Date: ${meetingDate}`);
+				console.log(`New Meeting Created - ID: ${meetingId}, Topic: ${meetingTopic}, Date: ${meetingDate}`);
 
-                // Create history block
-                createHistoryBlock(meetingId, meetingTopic, meetingDate);
-            } else {
-                console.error("No meeting ID returned.");
-            }
-        } catch (error) {
-            console.error("Error creating new meeting:", error);
-        }
-    });
+				// Create history block
+				createHistoryBlock(meetingId, meetingTopic, meetingDate);
+			} else {
+				console.error("No meeting ID returned.");
+			}
+		} catch (error) {
+			console.error("Error creating new meeting:", error);
+		}
+	});
 
-    // Function to create a history block in the sidebar
-    function createHistoryBlock(meetingId, title, date) {
-        const newBlockId = `history-block-${meetingId}`; // Unique ID based on meeting ID
-        const newBlock = document.createElement('div');
-        newBlock.className = 'history-block';
-        newBlock.id = newBlockId;
+	// Function to create a history block in the sidebar
+	function createHistoryBlock(meetingId, title, date) {
+		const newBlockId = `history-block-${meetingId}`; // Unique ID based on meeting ID
+		const newBlock = document.createElement('div');
+		newBlock.className = 'history-block';
+		newBlock.id = newBlockId;
 
-        // Create block content
-        newBlock.innerHTML = `
+		// Create block content
+		newBlock.innerHTML = `
             <div class="history-content">
                 <div class="title">${title}</div>
                 <div class="timestamp">${date}</div>
@@ -491,65 +533,65 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         `;
 
-        // Append to history
-        todayHistoryBlocks.prepend(newBlock);
+		// Append to history
+		todayHistoryBlocks.prepend(newBlock);
 
-        // Add click event listener to fetch transcript when clicked
-        newBlock.addEventListener('click', function (e) {
-            if (e.target.classList.contains('history-menu-btn') || e.target.closest('.history-menu')) {
-                return;
-            }
-            fetchTranscript(meetingId);
-            curMeetingId = meetingId;
-        });
+		// Add click event listener to fetch transcript when clicked
+		newBlock.addEventListener('click', function (e) {
+			if (e.target.classList.contains('history-menu-btn') || e.target.closest('.history-menu')) {
+				return;
+			}
+			fetchTranscript(meetingId);
+			curMeetingId = meetingId;
+		});
 
-        // Highlight effect
-        newBlock.style.animation = 'highlight 1s ease';
-    }
+		// Highlight effect
+		newBlock.style.animation = 'highlight 1s ease';
+	}
 
-    // Fetch Transcript using Meeting ID
-    async function fetchTranscript(meetingId) {
-        console.log(`Fetching transcript for meeting ID: ${meetingId}`);
-    
-        try {
-            const response = await fetch(`http://localhost:8000/meeting_contents/${meetingId}`);
-            const data = await response.json();
-    
-            if (data && Array.isArray(data)) {
-                // Clear previous content
-                transcriptArea.innerHTML = '';
-    
-                // Group messages by block_id, ignoring empty messages
-                const blocks = {};
-                data.forEach(item => {
-                    if (item.message.trim()) { // Ignore empty messages
-                        if (!blocks[item.block_id]) {
-                            blocks[item.block_id] = [];
-                        }
-                        blocks[item.block_id].push(item.message);
-                    }
-                });
-    
-                // Sort blocks by block_id and render them
-                Object.keys(blocks).sort((a, b) => a - b).forEach(blockId => {
-                    const blockDiv = document.createElement('div');
-                    blockDiv.className = 'transcript-block';
-                    blockDiv.textContent = blocks[blockId].join(' '); // Join all messages in a block
-                    transcriptArea.appendChild(blockDiv);
-                });
-    
-                // Show transcript area
-                transcriptArea.style.display = 'block';
-                terminologyList.style.display = 'block';
-            } else {
-                console.error("No transcript data found.");
-            }
-        } catch (error) {
-            console.error("Error fetching transcript data:", error);
-        }
-    }
-    
-    
+	// Fetch Transcript using Meeting ID
+	async function fetchTranscript(meetingId) {
+		console.log(`Fetching transcript for meeting ID: ${meetingId}`);
+
+		try {
+			const response = await fetch(`http://localhost:8000/meeting_contents/${meetingId}`);
+			const data = await response.json();
+
+			if (data && Array.isArray(data)) {
+				// Clear previous content
+				transcriptArea.innerHTML = '';
+
+				// Group messages by block_id, ignoring empty messages
+				const blocks = {};
+				data.forEach(item => {
+					if (item.message.trim()) { // Ignore empty messages
+						if (!blocks[item.block_id]) {
+							blocks[item.block_id] = [];
+						}
+						blocks[item.block_id].push(item.message);
+					}
+				});
+
+				// Sort blocks by block_id and render them
+				Object.keys(blocks).sort((a, b) => a - b).forEach(blockId => {
+					const blockDiv = document.createElement('div');
+					blockDiv.className = 'transcript-block';
+					blockDiv.textContent = blocks[blockId].join(' '); // Join all messages in a block
+					transcriptArea.appendChild(blockDiv);
+				});
+
+				// Show transcript area
+				transcriptArea.style.display = 'block';
+				terminologyList.style.display = 'block';
+			} else {
+				console.error("No transcript data found.");
+			}
+		} catch (error) {
+			console.error("Error fetching transcript data:", error);
+		}
+	}
+
+
 });
 
 const style = document.createElement('style');
