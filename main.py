@@ -2,6 +2,8 @@ import datetime
 import io
 import math
 from fastapi import FastAPI, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from database import get_db
@@ -11,6 +13,13 @@ from models import Meeting, MeetingContent, Settings
 import gemini
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class TranslateInput(BaseModel):
