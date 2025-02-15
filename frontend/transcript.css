@@ -190,6 +190,17 @@ ul {
     background-color: #40414F;
     border-radius: 8px;
 }
+.transcript-block {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #40414F;
+    transition: background-color 0.2s ease;
+}
+
+.transcript-block:hover {
+    background-color: #2c2d31;
+}
 
 /* CHAT POPUP */
 .chat-popup {
@@ -316,16 +327,21 @@ ul {
     background-color: #202123;
     border-top: 1px solid #444;
     margin-top: auto;
-    width: calc(100% - 20px);  /* 減去左右 padding */
-    position: absolute;  /* 改為絕對定位 */
-    bottom: 10px;       /* 距離底部的距離 */
-    left: 10px;         /* 與左邊界的距離 */
+    width: calc(100% - 20px);
+    /* 減去左右 padding */
+    position: absolute;
+    /* 改為絕對定位 */
+    bottom: 10px;
+    /* 距離底部的距離 */
+    left: 10px;
+    /* 與左邊界的距離 */
 }
 
 /* 調整輸入框樣式確保彈性寬度 */
 .sidebar-search input {
     flex: 1;
-    min-width: 0;      /* 防止 flex 項目溢出 */
+    min-width: 0;
+    /* 防止 flex 項目溢出 */
     height: 38px;
     padding: 8px;
     font-size: 1rem;
@@ -347,7 +363,8 @@ ul {
     color: #ffffff;
     display: flex;
     align-items: center;
-    flex-shrink: 0;    /* 防止按鈕被壓縮 */
+    flex-shrink: 0;
+    /* 防止按鈕被壓縮 */
 }
 
 .sidebar-search button:hover {
@@ -667,6 +684,13 @@ ul {
 .history-menu-item:hover {
     background-color: #383942;
 }
+
+/* set demo */
+.term-highlight {
+    color: #3b82f6;
+    font-weight: bold;
+}
+
 
 .server-message {
     color: #fff;
