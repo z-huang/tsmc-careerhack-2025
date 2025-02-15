@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let isRecording = false;
 
     function startWebSocket() {
-        ws = new WebSocket('ws://localhost:8000/ws/transcript');
+        ws = new WebSocket('ws://localhost:8000/ws/transcript/1');
         ws.onopen = () => console.log('WebSocket connected.');
         ws.onmessage = (message) => console.log('Received from server:', message.data);
     }
@@ -290,36 +290,21 @@ document.addEventListener('DOMContentLoaded', function () {
             const audioSettings = audioTrack.getSettings();
             console.log(`Sample Rate: ${audioSettings.sampleRate} Hz`);
             console.log(`Channels: ${audioSettings.channelCount || "Unknown"}`);
-    
-            // Check supported MIME types
-            let mimeType = '';
-            if (MediaRecorder.isTypeSupported('audio/webm')) {
-                mimeType = 'audio/webm';
-            } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
-                mimeType = 'audio/ogg';
-            } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-                mimeType = 'audio/mp4'; // Safari compatibility
-            } else {
-                throw new Error("No supported audio MIME type found.");
-            }
-    
-            console.log("Using MIME Type:", mimeType);
-    
-            mediaRecorder = new MediaRecorder(stream, { mimeType });
-    
+
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+
             mediaRecorder.ondataavailable = (event) => {
                 if (ws.readyState === WebSocket.OPEN) {
                     ws.send(event.data);
                 }
             };
-    
+
             mediaRecorder.start(1000); // Collect audio in 1000ms chunks
             console.log('Streaming started...');
         } catch (error) {
             console.error("Error accessing microphone:", error);
         }
     }
-    
 
     function stopStreaming() {
         if (mediaRecorder) {
