@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		let isRecording = false;
 
 		function startWebSocket() {
-			ws = new WebSocket('ws://localhost:8000/ws/transcript/1');
+			ws = new WebSocket(`ws://localhost:8000/ws/transcript/${curMeetingId}`);
 			ws.onopen = () => console.log('WebSocket connected.');
 			// ws.onmessage = (message) => console.log('Received from server:', message.data);
 			ws.onmessage = (message) => {
@@ -385,8 +385,11 @@ document.addEventListener('DOMContentLoaded', function () {
 				startStreaming();
 				startBtn.innerHTML = `<span class="btn-icon">■</span> <span data-i18n="stop">Stop</span>`;
 			} else {
-				stopStreaming();
-				ws.close;
+                stopStreaming();
+                setTimeout(function() {
+                    ws.close();
+                }, 5000);
+                
 				startBtn.innerHTML = `<span class="btn-icon">●</span> <span data-i18n="record">Record</span>`;
 			}
 			isRecording = !isRecording;
@@ -427,6 +430,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     let historyCounter = 0; // To generate unique IDs
+    let curMeetingId = 1;
 
     const newTranscriptBtn = document.getElementById('newTranscriptBtn');
     const todayHistoryBlocks = document.querySelector('.sidebar-section .history-blocks');
@@ -496,6 +500,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             fetchTranscript(meetingId);
+            curMeetingId = meetingId;
         });
 
         // Highlight effect
@@ -507,7 +512,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log(`Fetching transcript for meeting ID: ${meetingId}`);
     
         try {
-            const response = await fetch(`http://localhost:8000/meeting_contents/1`);
+            const response = await fetch(`http://localhost:8000/meeting_contents/${meetingId}`);
             const data = await response.json();
     
             if (data && Array.isArray(data)) {
