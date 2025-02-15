@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let isRecording = false;
 
     function startWebSocket() {
-        ws = new WebSocket('ws://localhost:8000/ws/transcript/1');
+        ws = new WebSocket('ws://localhost:8000/ws/transcript/2');
         ws.onopen = () => console.log('WebSocket connected.');
         // ws.onmessage = (message) => console.log('Received from server:', message.data);
         ws.onmessage = (message) => {
@@ -284,17 +284,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const data = JSON.parse(message.data);
             const text = data.text;
+            const id = data.block_id;
         
-            // Get the chat messages container
             const chatMessages = document.getElementById('transcriptArea');
-        
-            // Create a new message div
-            const serverMsgDiv = document.createElement('div');
-            serverMsgDiv.className = 'server-message'; // Add a class for styling
-            serverMsgDiv.textContent = `${text}`;
-        
-            // Append the message to the chat area
-            chatMessages.appendChild(serverMsgDiv);
+
+            // Check if a message with the same block_id already exists
+            let existingMsgDiv = document.getElementById(`msg-${id}`);
+
+            if (existingMsgDiv) {
+                // If a message with the same ID exists, update it
+                existingMsgDiv.textContent = text;
+            } else {
+                // Create a new message div
+                const serverMsgDiv = document.createElement('div');
+                serverMsgDiv.className = 'server-message'; // Add a class for styling
+                serverMsgDiv.id = `msg-${id}`; // Assign unique ID based on block_id
+                serverMsgDiv.textContent = text;
+
+                // Append the new message to the chat area
+                chatMessages.appendChild(serverMsgDiv);
+            }
         
             // Auto-scroll to the latest message
             chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -345,6 +354,7 @@ document.addEventListener('DOMContentLoaded', function () {
             startBtn.innerHTML = `<span class="btn-icon">■</span> <span data-i18n="stop">Stop</span>`;
         } else {
             stopStreaming();
+            ws.close;
             startBtn.innerHTML = `<span class="btn-icon">●</span> <span data-i18n="record">Record</span>`;
         }
         isRecording = !isRecording;
