@@ -278,7 +278,28 @@ document.addEventListener('DOMContentLoaded', function () {
     function startWebSocket() {
         ws = new WebSocket('ws://localhost:8000/ws/transcript/1');
         ws.onopen = () => console.log('WebSocket connected.');
-        ws.onmessage = (message) => console.log('Received from server:', message.data);
+        // ws.onmessage = (message) => console.log('Received from server:', message.data);
+        ws.onmessage = (message) => {
+            console.log('Received from server:', message.data);
+
+            const data = JSON.parse(message.data);
+            const text = data.text;
+        
+            // Get the chat messages container
+            const chatMessages = document.getElementById('transcriptArea');
+        
+            // Create a new message div
+            const serverMsgDiv = document.createElement('div');
+            serverMsgDiv.className = 'server-message'; // Add a class for styling
+            serverMsgDiv.textContent = `${text}`;
+        
+            // Append the message to the chat area
+            chatMessages.appendChild(serverMsgDiv);
+        
+            // Auto-scroll to the latest message
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
+        
     }
 
     async function startStreaming() {
