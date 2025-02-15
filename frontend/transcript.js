@@ -163,28 +163,59 @@ document.addEventListener('DOMContentLoaded', function () {
 	const chatMessages = document.getElementById('chatMessages');
 
 	// Example event: Sending a chat message
-	sendChatBtn.addEventListener('click', () => {
-		const text = chatInput.value.trim();
-		if (!text) return;
-
-		// Display user message
-		const userMsgDiv = document.createElement('div');
-		userMsgDiv.style.margin = '10px 0';
-		userMsgDiv.textContent = `User: ${text}`;
-		chatMessages.appendChild(userMsgDiv);
-
-		// Clear the input
-		chatInput.value = '';
-
-		// Mock AI response
-		const aiMsgDiv = document.createElement('div');
-		aiMsgDiv.style.margin = '10px 0';
-		aiMsgDiv.textContent = `AI: This is a mock response for "${text}".`;
-		chatMessages.appendChild(aiMsgDiv);
-
-		// Scroll to bottom
-		chatMessages.scrollTop = chatMessages.scrollHeight;
-	});
+	sendChatBtn.addEventListener('click', async () => {
+        const text = chatInput.value.trim();
+        if (!text) return;
+    
+        // Display user message in chat
+        const userMsgDiv = document.createElement('div');
+        userMsgDiv.style.margin = '10px 0';
+        userMsgDiv.style.fontWeight = 'bold';
+        userMsgDiv.textContent = `User: ${text}`;
+        chatMessages.appendChild(userMsgDiv);
+    
+        // Clear the input field
+        chatInput.value = '';
+    
+        // Create a placeholder for AI response (to be updated later)
+        const aiMsgDiv = document.createElement('div');
+        aiMsgDiv.style.margin = '10px 0';
+        aiMsgDiv.style.color = '#00ffcc';
+        aiMsgDiv.style.fontWeight = 'bold';
+        aiMsgDiv.textContent = `AI: ... (Generating response)`;
+        chatMessages.appendChild(aiMsgDiv);
+    
+        // Scroll to the latest message
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+        try {
+            // Send user input to the backend API
+            const response = await fetch('http://localhost:8000/chat', { // Adjust the API URL
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    meeting_id: 1,
+                    prompt: text
+                }),
+            });
+    
+            const responseData = await response.json();
+            // console.log("API Response:", responseData); 
+    
+            if (responseData && responseData.result) {
+                aiMsgDiv.textContent = `AI: ${responseData.result}`;
+            } else {
+                aiMsgDiv.textContent = `AI: (Error retrieving response)`;
+            }
+        } catch (error) {
+            console.error("Error fetching AI response:", error);
+            aiMsgDiv.textContent = `AI: (Failed to retrieve response)`;
+        }
+    
+        // Scroll again after response is updated
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+    
 
 	// Press Enter to send chat message
 	chatInput.addEventListener('keypress', (e) => {
@@ -276,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let isRecording = false;
 
     function startWebSocket() {
-        ws = new WebSocket('ws://localhost:8000/ws/transcript/2');
+        ws = new WebSocket('ws://localhost:8000/ws/transcript/1');
         ws.onopen = () => console.log('WebSocket connected.');
         // ws.onmessage = (message) => console.log('Received from server:', message.data);
         ws.onmessage = (message) => {
