@@ -1,7 +1,7 @@
 import datetime
 import io
 import math
-from fastapi import FastAPI, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -204,3 +204,27 @@ async def set_language(input_data: SetLanguageInput, db: Session = Depends(get_d
 
     db.commit()
     return {"success": True}
+
+
+@app.get("/search")
+async def search(
+    query: str = Query(..., min_length=1, description="Search keyword"),
+    meeting_id: int | None = Query(None, description="Filter by meeting ID"),
+    db: Session = Depends(get_db)
+):
+    search_query = db.query(MeetingContent).filter(
+        MeetingContent.message.ilike(f"%{query}%"))
+
+    if meeting_id is not None:
+        search_query = search_query.filter(MeetingContent.meeting_id == meeting_id)
+
+    results = search_query.limit(50).all()
+
+    return [
+        {
+            'meeting_id': row.meeting_id,
+            'text': row.message,
+            'time': row.time
+        }
+        for row in results
+    ]
