@@ -162,59 +162,59 @@ document.addEventListener('DOMContentLoaded', function () {
 		const sendChatBtn = document.getElementById('sendChatBtn');
 		const chatMessages = document.getElementById('chatMessages');
 
-	// Example event: Sending a chat message
-	sendChatBtn.addEventListener('click', async () => {
-        const text = chatInput.value.trim();
-        if (!text) return;
-    
-        // Display user message in chat
-        const userMsgDiv = document.createElement('div');
-        userMsgDiv.style.margin = '10px 0';
-        userMsgDiv.style.fontWeight = 'bold';
-        userMsgDiv.textContent = `User: ${text}`;
-        chatMessages.appendChild(userMsgDiv);
-    
-        // Clear the input field
-        chatInput.value = '';
-    
-        // Create a placeholder for AI response (to be updated later)
-        const aiMsgDiv = document.createElement('div');
-        aiMsgDiv.style.margin = '10px 0';
-        aiMsgDiv.style.color = '#00ffcc';
-        aiMsgDiv.style.fontWeight = 'bold';
-        aiMsgDiv.textContent = `AI: ... (Generating response)`;
-        chatMessages.appendChild(aiMsgDiv);
-    
-        // Scroll to the latest message
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    
-        try {
-            // Send user input to the backend API
-            const response = await fetch('http://localhost:8000/chat', { // Adjust the API URL
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    meeting_id: 1,
-                    prompt: text
-                }),
-            });
-    
-            const responseData = await response.json();
-            // console.log("API Response:", responseData); 
-    
-            if (responseData && responseData.result) {
-                aiMsgDiv.textContent = `AI: ${responseData.result}`;
-            } else {
-                aiMsgDiv.textContent = `AI: (Error retrieving response)`;
-            }
-        } catch (error) {
-            console.error("Error fetching AI response:", error);
-            aiMsgDiv.textContent = `AI: (Failed to retrieve response)`;
-        }
-    
-        // Scroll again after response is updated
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    });
+		// Example event: Sending a chat message
+		sendChatBtn.addEventListener('click', async () => {
+			const text = chatInput.value.trim();
+			if (!text) return;
+		
+			// Display user message in chat
+			const userMsgDiv = document.createElement('div');
+			userMsgDiv.style.margin = '10px 0';
+			userMsgDiv.style.fontWeight = 'bold';
+			userMsgDiv.textContent = `User: ${text}`;
+			chatMessages.appendChild(userMsgDiv);
+		
+			// Clear the input field
+			chatInput.value = '';
+		
+			// Create a placeholder for AI response (to be updated later)
+			const aiMsgDiv = document.createElement('div');
+			aiMsgDiv.style.margin = '10px 0';
+			aiMsgDiv.style.color = '#00ffcc';
+			aiMsgDiv.style.fontWeight = 'bold';
+			aiMsgDiv.textContent = `AI: ... (Generating response)`;
+			chatMessages.appendChild(aiMsgDiv);
+		
+			// Scroll to the latest message
+			chatMessages.scrollTop = chatMessages.scrollHeight;
+		
+			try {
+				// Send user input to the backend API
+				const response = await fetch('http://localhost:8000/chat', { // Adjust the API URL
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						meeting_id: 1,
+						prompt: text
+					}),
+				});
+		
+				const responseData = await response.json();
+				// console.log("API Response:", responseData); 
+		
+				if (responseData && responseData.result) {
+					aiMsgDiv.textContent = `AI: ${responseData.result}`;
+				} else {
+					aiMsgDiv.textContent = `AI: (Error retrieving response)`;
+				}
+			} catch (error) {
+				console.error("Error fetching AI response:", error);
+				aiMsgDiv.textContent = `AI: (Failed to retrieve response)`;
+			}
+		
+			// Scroll again after response is updated
+			chatMessages.scrollTop = chatMessages.scrollHeight;
+		});
     
 
 		// Press Enter to send chat message
@@ -306,91 +306,124 @@ document.addEventListener('DOMContentLoaded', function () {
 		let ws;
 		let isRecording = false;
 
-    function startWebSocket() {
-        ws = new WebSocket('ws://localhost:8000/ws/transcript/1');
-        ws.onopen = () => console.log('WebSocket connected.');
-        // ws.onmessage = (message) => console.log('Received from server:', message.data);
-        ws.onmessage = (message) => {
-            console.log('Received from server:', message.data);
+		function startWebSocket() {
+			ws = new WebSocket('ws://localhost:8000/ws/transcript/1');
+			ws.onopen = () => console.log('WebSocket connected.');
+			// ws.onmessage = (message) => console.log('Received from server:', message.data);
+			ws.onmessage = (message) => {
+				console.log('Received from server:', message.data);
 
-            const data = JSON.parse(message.data);
-            const text = data.text;
-            const id = data.block_id;
-        
-            const chatMessages = document.getElementById('transcriptArea');
+				const data = JSON.parse(message.data);
+				const text = data.text;
+				const id = data.block_id;
+			
+				const chatMessages = document.getElementById('transcriptArea');
 
-            // Check if a message with the same block_id already exists
-            let existingMsgDiv = document.getElementById(`msg-${id}`);
+				// Check if a message with the same block_id already exists
+				let existingMsgDiv = document.getElementById(`msg-${id}`);
 
-            if (existingMsgDiv) {
-                // If a message with the same ID exists, update it
-                existingMsgDiv.textContent = text;
-            } else {
-                // Create a new message div
-                const serverMsgDiv = document.createElement('div');
-                serverMsgDiv.className = 'server-message'; // Add a class for styling
-                serverMsgDiv.id = `msg-${id}`; // Assign unique ID based on block_id
-                serverMsgDiv.textContent = text;
+				if (existingMsgDiv) {
+					// If a message with the same ID exists, update it
+					existingMsgDiv.textContent = text;
+				} else {
+					// Create a new message div
+					const serverMsgDiv = document.createElement('div');
+					serverMsgDiv.className = 'server-message'; // Add a class for styling
+					serverMsgDiv.id = `msg-${id}`; // Assign unique ID based on block_id
+					serverMsgDiv.textContent = text;
 
-                // Append the new message to the chat area
-                chatMessages.appendChild(serverMsgDiv);
-            }
-        
-            // Auto-scroll to the latest message
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        };
-        
-    }
+					// Append the new message to the chat area
+					chatMessages.appendChild(serverMsgDiv);
+				}
+			
+				// Auto-scroll to the latest message
+				chatMessages.scrollTop = chatMessages.scrollHeight;
+			};
+			
+		}
 
-    async function startStreaming() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            audioStream = stream;
-            
-            const audioTrack = stream.getAudioTracks()[0];
-            const audioSettings = audioTrack.getSettings();
-            console.log(`Sample Rate: ${audioSettings.sampleRate} Hz`);
-            console.log(`Channels: ${audioSettings.channelCount || "Unknown"}`);
+		async function startStreaming() {
+			try {
+				const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+				audioStream = stream;
+				
+				const audioTrack = stream.getAudioTracks()[0];
+				const audioSettings = audioTrack.getSettings();
+				console.log(`Sample Rate: ${audioSettings.sampleRate} Hz`);
+				console.log(`Channels: ${audioSettings.channelCount || "Unknown"}`);
 
-            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+				mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
 
-            mediaRecorder.ondataavailable = (event) => {
-                if (ws.readyState === WebSocket.OPEN) {
-                    ws.send(event.data);
-                }
-            };
+				mediaRecorder.ondataavailable = (event) => {
+					if (ws.readyState === WebSocket.OPEN) {
+						ws.send(event.data);
+					}
+				};
 
-            mediaRecorder.start(1000); // Collect audio in 1000ms chunks
-            console.log('Streaming started...');
-        } catch (error) {
-            console.error("Error accessing microphone:", error);
-        }
-    }
+				mediaRecorder.start(1000); // Collect audio in 1000ms chunks
+				console.log('Streaming started...');
+			} catch (error) {
+				console.error("Error accessing microphone:", error);
+			}
+		}
 
-    function stopStreaming() {
-        if (mediaRecorder) {
-            mediaRecorder.stop();
-        }
-        if (audioStream) {
-            audioStream.getTracks().forEach(track => track.stop());
-        }
-        console.log('Streaming stopped.');
-    }
-	/*set*/
+		function stopStreaming() {
+			if (mediaRecorder) {
+				mediaRecorder.stop();
+			}
+			if (audioStream) {
+				audioStream.getTracks().forEach(track => track.stop());
+			}
+			console.log('Streaming stopped.');
+		}
+		/*set*/
 
-    const startBtn = document.getElementById('startBtn');
-    startBtn.addEventListener('click', function () {
-        if (!isRecording) {
-            startWebSocket();
-            startStreaming();
-            startBtn.innerHTML = `<span class="btn-icon">■</span> <span data-i18n="stop">Stop</span>`;
-        } else {
-            stopStreaming();
-            ws.close;
-            startBtn.innerHTML = `<span class="btn-icon">●</span> <span data-i18n="record">Record</span>`;
-        }
-        isRecording = !isRecording;
-    });
+		const startBtn = document.getElementById('startBtn');
+		startBtn.addEventListener('click', function () {
+			if (!isRecording) {
+				startWebSocket();
+				startStreaming();
+				startBtn.innerHTML = `<span class="btn-icon">■</span> <span data-i18n="stop">Stop</span>`;
+			} else {
+				stopStreaming();
+				ws.close;
+				startBtn.innerHTML = `<span class="btn-icon">●</span> <span data-i18n="record">Record</span>`;
+			}
+			isRecording = !isRecording;
+		});
+	}
+	const initializeDemo = () => {
+		const trainingBlock = document.getElementById('training-wav');
+		const transcriptArea = document.getElementById('transcriptArea');
+		const terminologyList = document.getElementById('terminologyList');
+	
+		if (trainingBlock && transcriptArea && terminologyList) {
+			let isShowing = false;  // 追蹤顯示狀態
+	
+			trainingBlock.addEventListener('click', function(e) {
+				// 忽略選單點擊
+				if (e.target.classList.contains('history-menu-btn') || 
+					e.target.closest('.history-menu')) {
+					return;
+				}
+	
+				if (!isShowing) {
+					// 第一次點擊：顯示內容
+					transcriptArea.style.display = 'block';
+					terminologyList.style.display = 'block';
+					isShowing = true;
+				} else {
+					// 再次點擊：隱藏內容
+					transcriptArea.style.display = 'none';
+					terminologyList.style.display = 'none';
+					isShowing = false;
+				}
+			});
+		}
+	}
+
+	existingCode();
+	initializeDemo();
 });
 
 const style = document.createElement('style');
