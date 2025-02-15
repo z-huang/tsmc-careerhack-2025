@@ -225,68 +225,68 @@ document.addEventListener('DOMContentLoaded', function () {
 			}
 		});
 
-		const newTranscriptBtn = document.getElementById('newTranscriptBtn');
-		const todayHistoryBlocks = document.querySelector('.sidebar-section .history-blocks');
+		// const newTranscriptBtn = document.getElementById('newTranscriptBtn');
+		// const todayHistoryBlocks = document.querySelector('.sidebar-section .history-blocks');
 
-		// 新增除錯訊息
-		console.log('按鈕元素:', newTranscriptBtn);
-		console.log('歷史區塊容器:', todayHistoryBlocks);
+		// // 新增除錯訊息
+		// console.log('按鈕元素:', newTranscriptBtn);
+		// console.log('歷史區塊容器:', todayHistoryBlocks);
 
-		if (!newTranscriptBtn || !todayHistoryBlocks) {
-			console.error('找不到必要的 DOM 元素');
-			return;
-		}
+		// if (!newTranscriptBtn || !todayHistoryBlocks) {
+		// 	console.error('找不到必要的 DOM 元素');
+		// 	return;
+		// }
 
-		newTranscriptBtn.addEventListener('click', function () {
-			const newBlock = document.createElement('div');
-			newBlock.className = 'history-block';
+		// newTranscriptBtn.addEventListener('click', function () {
+		// 	const newBlock = document.createElement('div');
+		// 	newBlock.className = 'history-block';
 
-			const currentTime = new Date().toLocaleTimeString();
+		// 	const currentTime = new Date().toLocaleTimeString();
 
-			// 修改 block 內容結構
-			newBlock.innerHTML = `
-				<div class="history-content">
-					<div class="title">Untitled</div>
-					<div class="timestamp">${currentTime}</div>
-				</div>
-				<div class="history-menu-btn">⋮</div>
-				<div class="history-menu">
-					<div class="history-menu-item">Rename</div>
-					<div class="history-menu-item">Delete</div>
-				</div>
-			`;
+		// 	// 修改 block 內容結構
+		// 	newBlock.innerHTML = `
+		// 		<div class="history-content">
+		// 			<div class="title">Untitled</div>
+		// 			<div class="timestamp">${currentTime}</div>
+		// 		</div>
+		// 		<div class="history-menu-btn">⋮</div>
+		// 		<div class="history-menu">
+		// 			<div class="history-menu-item">Rename</div>
+		// 			<div class="history-menu-item">Delete</div>
+		// 		</div>
+		// 	`;
 
-			// 添加選單點擊事件
-			const menuBtn = newBlock.querySelector('.history-menu-btn');
-			const menu = newBlock.querySelector('.history-menu');
+		// 	// 添加選單點擊事件
+		// 	const menuBtn = newBlock.querySelector('.history-menu-btn');
+		// 	const menu = newBlock.querySelector('.history-menu');
 
-			menuBtn.addEventListener('click', function (e) {
-				e.stopPropagation(); // 防止觸發 block 的點擊事件
-				menu.classList.toggle('show');
-			});
+		// 	menuBtn.addEventListener('click', function (e) {
+		// 		e.stopPropagation(); // 防止觸發 block 的點擊事件
+		// 		menu.classList.toggle('show');
+		// 	});
 
-			// 點擊其他地方時關閉選單
-			document.addEventListener('click', function (e) {
-				if (!menu.contains(e.target) && !menuBtn.contains(e.target)) {
-					menu.classList.remove('show');
-				}
-			});
+		// 	// 點擊其他地方時關閉選單
+		// 	document.addEventListener('click', function (e) {
+		// 		if (!menu.contains(e.target) && !menuBtn.contains(e.target)) {
+		// 			menu.classList.remove('show');
+		// 		}
+		// 	});
 
-			// 將新區塊插入到容器中
-			if (todayHistoryBlocks.firstChild) {
-				todayHistoryBlocks.insertBefore(newBlock, todayHistoryBlocks.firstChild);
-			} else {
-				todayHistoryBlocks.appendChild(newBlock);
-			}
+		// 	// 將新區塊插入到容器中
+		// 	if (todayHistoryBlocks.firstChild) {
+		// 		todayHistoryBlocks.insertBefore(newBlock, todayHistoryBlocks.firstChild);
+		// 	} else {
+		// 		todayHistoryBlocks.appendChild(newBlock);
+		// 	}
 
-			// 添加點擊事件和動畫效果
-			newBlock.addEventListener('click', function () {
-				const transcriptArea = document.getElementById('transcriptArea');
-				transcriptArea.innerHTML = '';
-			});
+		// 	// 添加點擊事件和動畫效果
+		// 	newBlock.addEventListener('click', function () {
+		// 		const transcriptArea = document.getElementById('transcriptArea');
+		// 		transcriptArea.innerHTML = '';
+		// 	});
 
-			newBlock.style.animation = 'highlight 1s ease';
-		});
+		// 	newBlock.style.animation = 'highlight 1s ease';
+		// });
 
 
 		// termination blocks
@@ -424,6 +424,127 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	existingCode();
 	initializeDemo();
+
+
+    let historyCounter = 0; // To generate unique IDs
+
+    const newTranscriptBtn = document.getElementById('newTranscriptBtn');
+    const todayHistoryBlocks = document.querySelector('.sidebar-section .history-blocks');
+    const transcriptArea = document.getElementById('transcriptArea');
+    const terminologyList = document.getElementById('terminologyList');
+
+    if (!newTranscriptBtn || !todayHistoryBlocks) {
+        console.error('找不到必要的 DOM 元素');
+        return;
+    }
+
+    // Create a new history block and fetch meeting ID
+    newTranscriptBtn.addEventListener('click', async function () {
+        try {
+            // Call API to create a new meeting
+            const response = await fetch('http://localhost:8000/new_meeting', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            });
+
+            const data = await response.json();
+
+            if (data && data.meeting_id) {
+                const meetingId = data.meeting_id;
+                const meetingTopic = data.topic || "Untitled Meeting";
+                const meetingDate = data.date || new Date().toISOString().split('T')[0]; // Default to today
+
+                console.log(`New Meeting Created - ID: ${meetingId}, Topic: ${meetingTopic}, Date: ${meetingDate}`);
+
+                // Create history block
+                createHistoryBlock(meetingId, meetingTopic, meetingDate);
+            } else {
+                console.error("No meeting ID returned.");
+            }
+        } catch (error) {
+            console.error("Error creating new meeting:", error);
+        }
+    });
+
+    // Function to create a history block in the sidebar
+    function createHistoryBlock(meetingId, title, date) {
+        const newBlockId = `history-block-${meetingId}`; // Unique ID based on meeting ID
+        const newBlock = document.createElement('div');
+        newBlock.className = 'history-block';
+        newBlock.id = newBlockId;
+
+        // Create block content
+        newBlock.innerHTML = `
+            <div class="history-content">
+                <div class="title">${title}</div>
+                <div class="timestamp">${date}</div>
+            </div>
+            <div class="history-menu-btn">⋮</div>
+            <div class="history-menu">
+                <div class="history-menu-item">Rename</div>
+                <div class="history-menu-item">Delete</div>
+            </div>
+        `;
+
+        // Append to history
+        todayHistoryBlocks.prepend(newBlock);
+
+        // Add click event listener to fetch transcript when clicked
+        newBlock.addEventListener('click', function (e) {
+            if (e.target.classList.contains('history-menu-btn') || e.target.closest('.history-menu')) {
+                return;
+            }
+            fetchTranscript(meetingId);
+        });
+
+        // Highlight effect
+        newBlock.style.animation = 'highlight 1s ease';
+    }
+
+    // Fetch Transcript using Meeting ID
+    async function fetchTranscript(meetingId) {
+        console.log(`Fetching transcript for meeting ID: ${meetingId}`);
+    
+        try {
+            const response = await fetch(`http://localhost:8000/meeting_contents/1`);
+            const data = await response.json();
+    
+            if (data && Array.isArray(data)) {
+                // Clear previous content
+                transcriptArea.innerHTML = '';
+    
+                // Group messages by block_id, ignoring empty messages
+                const blocks = {};
+                data.forEach(item => {
+                    if (item.message.trim()) { // Ignore empty messages
+                        if (!blocks[item.block_id]) {
+                            blocks[item.block_id] = [];
+                        }
+                        blocks[item.block_id].push(item.message);
+                    }
+                });
+    
+                // Sort blocks by block_id and render them
+                Object.keys(blocks).sort((a, b) => a - b).forEach(blockId => {
+                    const blockDiv = document.createElement('div');
+                    blockDiv.className = 'transcript-block';
+                    blockDiv.textContent = blocks[blockId].join(' '); // Join all messages in a block
+                    transcriptArea.appendChild(blockDiv);
+                });
+    
+                // Show transcript area
+                transcriptArea.style.display = 'block';
+                terminologyList.style.display = 'block';
+            } else {
+                console.error("No transcript data found.");
+            }
+        } catch (error) {
+            console.error("Error fetching transcript data:", error);
+        }
+    }
+    
+    
 });
 
 const style = document.createElement('style');
