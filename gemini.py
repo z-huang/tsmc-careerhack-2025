@@ -1,12 +1,13 @@
 import asyncio
 import re
-from typing import List, Tuple
+from typing import Iterable, List, Tuple
 from google.cloud import aiplatform
 from google.cloud.speech_v2 import SpeechClient
 from google.cloud.speech_v2.types import cloud_speech
 import vertexai
 from vertexai.generative_models import GenerativeModel
 import vertexai.preview.generative_models as generative_models
+from models import MeetingContent
 from proper_noun import ENGLISH_DICT, GERMAN_DICT, CHINESE_DICT, JAPANESE_DICT, DESC_DICT, ALL_PROPER_NOUNS
 from config import PROJECT_ID, LOCATION
 
@@ -287,6 +288,53 @@ def find_keywords(text) -> List[Tuple[int, int, int]]:
     matches.sort(key=lambda x: x[1])
 
     return sorted(set(matches))
+
+
+def chat(meeting_records: Iterable[MeetingContent], prompt):
+    meeting_raw_text = '\n'.join([f"""\
+Time: {record.time}
+Text:
+{record.message}
+""" for record in meeting_records])
+
+    """
+    Calls Gemini to ask a question about a multi-lingual meeting record.
+    Ensures proper nouns are correctly spelled before generating an answer.
+
+    Args:
+    - meeting_record (str): The full meeting transcript in multiple languages.
+    - prompt (str): The question to ask about the meeting.
+
+    Returns:
+    - str: Gemini's response.
+    """
+
+    formatted_prompt = f"""
+    ## System
+    You are an AI assistant analyzing a multilingual meeting record. Your task is to answer questions about the meeting while preserving important details from all languages.
+
+    ## Corrected Meeting Record
+    {meeting_raw_text}
+
+    ## Question
+    {prompt}
+
+    ## Instructions
+    - The meeting may contain multiple languages, including English, Chinese, German, and Japanese.
+    - Ensure your response is accurate and does not lose key details.
+    - If needed, infer meaning across different languages while keeping the response in the most relevant language.
+    
+    ## Response
+    [Answer here]
+    """
+
+    response = model.generate_content(
+        [formatted_prompt],
+        generation_config=generation_config,
+        safety_settings=safety_settings,
+    )
+
+    return response.text.strip()
 
 
 if __name__ == "__main__":
