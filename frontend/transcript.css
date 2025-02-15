@@ -701,3 +701,13 @@ ul {
     max-width: 100%;
     word-wrap: break-word;
 }
+
+/* 如果想要為下載按鈕添加特殊樣式 */
+.history-menu-item#downloadBtn {
+    border-top: 1px solid #444;  /* 添加一個分隔線 */
+}
+
+.history-menu-item#downloadBtn:hover {
+    background-color: #383942;
+    color: #6ab0c4;  /* 使用特殊的強調色 */
+}
