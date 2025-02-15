@@ -1,3 +1,4 @@
+import datetime
 import io
 import math
 from fastapi import FastAPI, Depends, HTTPException, WebSocket, WebSocketDisconnect
@@ -36,8 +37,8 @@ WIN_SIZE = 3000
 HOP_SIZE = 2000
 
 
-@app.websocket("/ws/transcript")
-async def transcript(websocket: WebSocket):
+@app.websocket("/ws/transcript/{meeting_id}")
+async def transcript(websocket: WebSocket, meeting_id: int, db: Session = Depends(get_db)):
     await websocket.accept()
     audio_data = b''
 
@@ -46,6 +47,8 @@ async def transcript(websocket: WebSocket):
     processed_time = 0
     block_text = ''
     block_i = 0
+
+    entry = None
 
     try:
         while True:
@@ -73,7 +76,7 @@ async def transcript(websocket: WebSocket):
                         block_text = gemini.merge_text(block_text, text, confidence)
                         block_text = gemini.correct_keywords(block_text)
                         keywords = gemini.find_keywords(block_text)
-                        await websocket.send_json({
+                        entry = {
                             'block_id': block_i,
                             'text': block_text,
                             'keywords': [
@@ -84,7 +87,8 @@ async def transcript(websocket: WebSocket):
                                 }
                                 for id, start, end in keywords
                             ]
-                        })
+                        }
+                        await websocket.send_json(entry)
 
                 processed_time += HOP_SIZE
                 while processed_time >= silences[seg_i + 1][0]:
@@ -92,8 +96,26 @@ async def transcript(websocket: WebSocket):
                     if block_text:
                         block_text = ''
                         block_i += 1
+                        row = MeetingContent(
+                            meeting_id=meeting_id,
+                            block_id=entry['block_id'],
+                            message=entry['text'],
+                            time=datetime.datetime.now(),
+                        )
+                        db.add(row)
+                        db.commit()
+                        entry = None
 
     except WebSocketDisconnect:
+        if entry:
+            row = MeetingContent(
+                meeting_id=meeting_id,
+                block_id=entry['block_id'],
+                message=entry['text'],
+                time=datetime.datetime.now(),
+            )
+            db.add(row)
+            db.commit()
         print("Client disconnected.")
 
 
@@ -110,18 +132,33 @@ async def get_meetings(db: Session = Depends(get_db)):
     ]
 
 
-@app.post("/get_content")
-async def get_content(meeting_id: str, db: Session = Depends(get_db)):
-    meeting = db.query(MeetingContent).filter(
+@app.post("/new_meeting")
+async def create_meeting(db: Session = Depends(get_db)):
+    new_meeting = Meeting(topic="", date=datetime.date.today())
+    db.add(new_meeting)
+    db.commit()
+    db.refresh(new_meeting)
+
+    return {
+        "meeting_id": new_meeting.meeting_id,
+        "topic": new_meeting.topic,
+        "date": new_meeting.date.strftime("%Y-%m-%d")
+    }
+
+
+@app.get("/meeting_contents/{meeting_id}")
+async def get_meeting_contents(meeting_id: str, db: Session = Depends(get_db)):
+    contents = db.query(MeetingContent).filter(
         MeetingContent.meeting_id == meeting_id).all()
-    if not meeting:
-        raise HTTPException(status_code=404, detail="Meeting not found")
+
     return [
         {
-            "message": m.message,
-            "time": m.time
+            "id": content.id,
+            "block_id": content.block_id,
+            "message": content.message,
+            "time": content.time.strftime("%H:%M:%S")
         }
-        for m in meeting
+        for content in contents
     ]
 
 

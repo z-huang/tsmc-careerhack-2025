@@ -1,4 +1,3 @@
-
 from sqlalchemy import Column, Integer, String, Date, ForeignKey, Time
 from sqlalchemy.orm import relationship, Session
 from database import engine, Base
@@ -13,7 +12,7 @@ class Settings(Base):
 
 class Meeting(Base):
     __tablename__ = 'meetings'
-    meeting_id = Column(String, primary_key=True, index=True)
+    meeting_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     topic = Column(String, index=True)
     date = Column(Date)
 
@@ -22,8 +21,9 @@ class Meeting(Base):
 
 class MeetingContent(Base):
     __tablename__ = 'meeting_contents'
-    id = Column(Integer, primary_key=True, index=True)
-    meeting_id = Column(String, ForeignKey('meetings.meeting_id'))
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    meeting_id = Column(Integer, ForeignKey('meetings.meeting_id'))
+    block_id = Column(Integer)
     message = Column(String)
     time = Column(Time)
 
@@ -31,6 +31,7 @@ class MeetingContent(Base):
 
 
 if __name__ == '__main__':
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     
     with Session(bind=engine) as session:
