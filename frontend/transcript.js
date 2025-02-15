@@ -376,6 +376,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         console.log('Streaming stopped.');
     }
+	/*set*/
 
     const startBtn = document.getElementById('startBtn');
     startBtn.addEventListener('click', function () {
