@@ -38,21 +38,57 @@ safety_settings = {
 model = GenerativeModel("gemini-2.0-flash-001")
 
 
-def translate_text(text: str, target_lang: str, source_lang=None) -> str:
-    """
-    Translates `text` from `source_lang` to `target_lang` using Gemini model.
-    """
-    if not source_lang:
-        prompt = f""":{text}\n{target_lang}:"""
-    else:
-        prompt = f"""{source_lang}: {text}\n{target_lang}:"""
+def translate_text(text: str, target_lang: str) -> str:
+    prompt = (
+        "## System\n"
+        "You are an AI that translates text into a specified target language while preserving and correctly spelling proper nouns.\n"
+        "Your goal is to ensure that known proper nouns remain unchanged and are spelled correctly according to the provided dictionary.\n"
+        "Additionally, handle multi-language contexts naturally, as users may mix languages, especially Chinese and English.\n\n"
 
-    response = model.generate_content(
-        [prompt],
-        generation_config=generation_config,
-        safety_settings=safety_settings,
+        "## Input\n"
+        "**Proper Nouns Dictionary (By Language)**\n"
+        f"English: {ENGLISH_DICT}\n"
+        f"Chinese: {CHINESE_DICT}\n"
+        f"German: {GERMAN_DICT}\n"
+        f"Japanese: {JAPANESE_DICT}\n\n"
+        f"Descriptions (in English): {DESC_DICT}\n\n"
+        f"**Target Language:** {target_lang}\n"
+        f"**Text to Translate:**\n{text}\n\n"
+
+        "## Task\n"
+        "1. Translate the input text into the target language.\n"
+        "2. Ensure that proper nouns from the provided dictionary remain unchanged and are spelled correctly.\n"
+        "3. Maintain the natural flow and grammar of the target language while considering multi-language text input.\n"
+        "4. If a proper noun is ambiguous, infer the correct term from context.\n\n"
+
+        "## Response Format (Strict Output)**\n"
+        "**Translated Text:**\n"
+        "[Translation of the input text into the target language with proper noun preservation]\n\n"
+
+        "**Input Example:**\n"
+        "I am using BigQuery for data analysis and testing クラウドらん.\n\n"
+
+        "**Expected Output (for Japanese translation):**\n"
+        "**Translated Text:**\n"
+        "私は BigQuery を使ってデータ分析を行い、クラウドランをテストしています。\n\n"
+
+        "**Ensure that the output is strictly just the translated text with no extra formatting or explanations!**"
     )
-    return response.text.rstrip()
+    
+    match = None
+    extracted = ""
+    while match is None:
+        response = model.generate_content(
+            [prompt],
+            generation_config=generation_config,
+            safety_settings=safety_settings,
+        )
+
+        match = re.search(r"\*\*Translated Text:\*\*\n(.+)", response.text, re.DOTALL)
+        if match:
+            extracted = match.group(1)
+
+    return extracted.rstrip('\n')
 
 
 async def _recognize_audio(client, request):

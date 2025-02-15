@@ -50,13 +50,13 @@ HOP_SIZE = 2000
 async def transcript(websocket: WebSocket, meeting_id: int, db: Session = Depends(get_db)):
     await websocket.accept()
     audio_data = b''
-
     seg_i = 0
 
     processed_time = 0
     block_text = ''
     block_i = db.query(func.coalesce(func.max(MeetingContent.block_id), -1)).filter(
         MeetingContent.meeting_id == meeting_id).scalar() + 1
+    target_lang = db.query(Settings).filter(Settings.key == "language").first().value
 
     entry = None
 
@@ -66,7 +66,6 @@ async def transcript(websocket: WebSocket, meeting_id: int, db: Session = Depend
             audio = AudioSegment.from_file(io.BytesIO(audio_data), format='webm')
             silences = [
                 [0, 0]] + detect_silence(audio, min_silence_len=1000, silence_thresh=-40) + [[math.inf, math.inf]]
-            print(silences)
 
             while len(audio) - processed_time > WIN_SIZE:
                 seg_start = silences[seg_i][1]
@@ -85,6 +84,7 @@ async def transcript(websocket: WebSocket, meeting_id: int, db: Session = Depend
                     if confidence != -1:
                         block_text = gemini.merge_text(block_text, text, confidence)
                         block_text = gemini.correct_keywords(block_text)
+                        block_text = gemini.translate_text(block_text, target_lang)
                         keywords = gemini.find_keywords(block_text)
                         entry = {
                             'block_id': block_i,
@@ -126,7 +126,7 @@ async def transcript(websocket: WebSocket, meeting_id: int, db: Session = Depend
             )
             db.add(row)
             db.commit()
-        print("Client disconnected.")
+    print("Client disconnected.")
 
 
 @app.post("/get_meetings")
@@ -177,7 +177,7 @@ class ChatInput(BaseModel):
     prompt: str
 
 
-@app.get("/chat")
+@app.post("/chat")
 async def chat(input_data: ChatInput, db: Session = Depends(get_db)):
     contents = db.query(MeetingContent).filter(
         MeetingContent.meeting_id == input_data.meeting_id).all()
