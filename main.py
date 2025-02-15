@@ -1,8 +1,10 @@
 import datetime
 import io
 import math
-from fastapi import FastAPI, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect
+import os
+from fastapi import FastAPI, Depends, File, HTTPException, Query, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -42,7 +44,7 @@ async def translate(input_data: TranslateInput):
         "keywords": 'NotImplemented'
     }
 
-WIN_SIZE = 3000
+WIN_SIZE = 4000
 HOP_SIZE = 2000
 
 
@@ -50,7 +52,6 @@ HOP_SIZE = 2000
 async def transcript(websocket: WebSocket, meeting_id: int, db: Session = Depends(get_db)):
     await websocket.accept()
     audio_data = b''
-    seg_i = 0
 
     processed_time = 0
     block_text = ''
@@ -58,66 +59,96 @@ async def transcript(websocket: WebSocket, meeting_id: int, db: Session = Depend
         MeetingContent.meeting_id == meeting_id).scalar() + 1
     target_lang = db.query(Settings).filter(Settings.key == "language").first().value
 
-    entry = None
+    prev_k = []  # List to store last k tries
+    k = 4  # Number of previous attempts to keep track of
 
     try:
         while True:
             audio_data += await websocket.receive_bytes()
             audio = AudioSegment.from_file(io.BytesIO(audio_data), format='webm')
-            silences = [
-                [0, 0]] + detect_silence(audio, min_silence_len=1000, silence_thresh=-40) + [[math.inf, math.inf]]
 
             while len(audio) - processed_time > WIN_SIZE:
-                seg_start = silences[seg_i][1]
-                seg_end = math.inf
-                for i, (start, end) in enumerate(silences):
-                    if seg_start == end:
-                        seg_end = silences[i + 1][0]
-
                 buffer = io.BytesIO()
-                start = max(seg_start, processed_time)
-                end = min(seg_end, processed_time + WIN_SIZE)
-                if end - start >= 1000:
-                    audio[start:end].export(buffer, format='mp3')
+                audio[processed_time:processed_time +
+                      WIN_SIZE].export(buffer, format='mp3')
 
-                    text, confidence = await gemini.speech2text(buffer.getvalue())
-                    if confidence != -1:
-                        block_text = gemini.merge_text(block_text, text, confidence)
-                        block_text = gemini.correct_keywords(block_text)
-                        block_text = gemini.translate_text(block_text, target_lang)
-                        keywords = gemini.find_keywords(block_text)
-                        entry = {
-                            'block_id': block_i,
-                            'text': block_text,
-                            'keywords': [
-                                {
-                                    'id': id,
-                                    'start': start,
-                                    'end': end
-                                }
-                                for id, start, end in keywords
-                            ]
-                        }
-                        await websocket.send_json(entry)
+                text, confidence = await gemini.speech2text(buffer.getvalue())
+                if confidence != -1:
+                    tmp = gemini.merge_text(
+                        prev_k[-1] if prev_k else "", text, confidence)
+                    prev_k.append(tmp)
+                    if len(prev_k) > k:
+                        prev_k.pop(0)  # Maintain only last k tries
+
+                    for j in range(min(map(len, prev_k)), -1, -1):
+                        if j == 0 or len(prev_k) < k:
+                            break
+                        if all(entry[:j] == prev_k[0][:j] for entry in prev_k):
+                            s = gemini.correct_keywords(prev_k[0][:j])
+                            s = gemini.translate_text(s, target_lang)
+                            keywords = gemini.find_keywords(s)
+                            prev_k = [entry[j:] for entry in prev_k]
+                            entry = {
+                                'block_id': block_i,
+                                'text': s,
+                                'keywords': [
+                                    {
+                                        'id': id,
+                                        'start': start,
+                                        'end': end
+                                    }
+                                    for id, start, end in keywords
+                                ]
+                            }
+                            block_i += 1
+                            row = MeetingContent(
+                                meeting_id=meeting_id,
+                                block_id=entry['block_id'],
+                                message=entry['text'],
+                                time=datetime.datetime.now(),
+                            )
+                            db.add(row)
+                            db.commit()
+                            await websocket.send_json(entry)
+                            break
+
+                    s = gemini.correct_keywords(prev_k[-1]) 
+                    s = gemini.translate_text(s, target_lang)
+                    keywords = gemini.find_keywords(s)
+                    entry = {
+                        'block_id': block_i,
+                        'text': s,
+                        'keywords': [
+                            {
+                                'id': id,
+                                'start': start,
+                                'end': end
+                            }
+                            for id, start, end in keywords
+                        ]
+                    }
+                    await websocket.send_json(entry)
 
                 processed_time += HOP_SIZE
-                while processed_time >= silences[seg_i + 1][0]:
-                    seg_i += 1
-                    if block_text:
-                        block_text = ''
-                        block_i += 1
-                        row = MeetingContent(
-                            meeting_id=meeting_id,
-                            block_id=entry['block_id'],
-                            message=entry['text'],
-                            time=datetime.datetime.now(),
-                        )
-                        db.add(row)
-                        db.commit()
-                        entry = None
 
     except WebSocketDisconnect:
-        if entry:
+        if prev_k:
+            s = gemini.correct_keywords(prev_k[-1])
+            s = gemini.translate_text(s, target_lang)
+            keywords = gemini.find_keywords(s)
+            entry = {
+                'block_id': block_i,
+                'text': s,
+                'keywords': [
+                    {
+                        'id': id,
+                        'start': start,
+                        'end': end
+                    }
+                    for id, start, end in keywords
+                ]
+            }
+            block_i += 1
             row = MeetingContent(
                 meeting_id=meeting_id,
                 block_id=entry['block_id'],
@@ -126,8 +157,18 @@ async def transcript(websocket: WebSocket, meeting_id: int, db: Session = Depend
             )
             db.add(row)
             db.commit()
+            # await websocket.send_json(entry)
+
+    audio.export(f'output/meeting_{meeting_id}.mp3', format='mp3')
+
     print("Client disconnected.")
 
+# @app.post("/upload_transcript/{meeting_id}")
+# async def upload_transcript(meeting_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
+#     audio_data = await file.read()
+#     audio = AudioSegment.from_file(io.BytesIO(audio_data), format=file.filename.split('.')[-1])
+    
+    
 
 @app.post("/get_meetings")
 async def get_meetings(db: Session = Depends(get_db)):
@@ -160,12 +201,13 @@ async def create_meeting(db: Session = Depends(get_db)):
 async def get_meeting_contents(meeting_id: str, db: Session = Depends(get_db)):
     contents = db.query(MeetingContent).filter(
         MeetingContent.meeting_id == meeting_id).all()
+    target_lang = db.query(Settings).filter(Settings.key == "language").first().value
 
     return [
         {
             "id": content.id,
             "block_id": content.block_id,
-            "message": content.message,
+            "message": gemini.translate_text(content.message, target_lang),
             "time": content.time.strftime("%H:%M:%S")
         }
         for content in contents
@@ -179,9 +221,12 @@ class ChatInput(BaseModel):
 
 @app.post("/chat")
 async def chat(input_data: ChatInput, db: Session = Depends(get_db)):
+    target_lang = db.query(Settings).filter(Settings.key == "language").first().value
+
     contents = db.query(MeetingContent).filter(
         MeetingContent.meeting_id == input_data.meeting_id).all()
     result = gemini.chat(contents, input_data.prompt)
+    result = gemini.translate_text(result, target_lang)
     return {"result": result}
 
 
@@ -228,3 +273,11 @@ async def search(
         }
         for row in results
     ]
+
+
+@app.get("/download/{meeting_id}")
+async def download_file(meeting_id: str):
+    file_path = os.path.join('output', f'meeting_{meeting_id}.mp3')
+    if os.path.exists(file_path):
+        return FileResponse(path=file_path, filename=f'meeting_{meeting_id}.mp3', media_type="audio/mp3")
+    return {"error": "File not found"}

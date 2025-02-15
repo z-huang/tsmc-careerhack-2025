@@ -13,13 +13,39 @@ from config import PROJECT_ID, LOCATION
 
 aiplatform.init(project=PROJECT_ID, location=LOCATION)
 
-MAX_OUTPUT_TOKENS = 256
+MAX_OUTPUT_TOKENS = 1024
 TEMPERATURE = 0.7
 TOP_P = 0.9
 TOP_K = 40
 
 vertexai.init(project=PROJECT_ID, location=LOCATION)
-
+short_it_terms = [
+    "AI",
+    "API",
+    "BI",
+    "CI/CD",
+    "Cloud",
+    "DevOps",
+    "Edge",
+    "GenAI",
+    "GPU",
+    "IoT",
+    "LLM",
+    "ML",
+    "NLP",
+    "No-Code",
+    "Quantum",
+    "RAG",
+    "SaaS",
+    "Sensor",
+    "Serverless",
+    "SIEM",
+    "SOC",
+    "SSD",
+    "TinyML",
+    "VectorDB",
+    "Zero Trust"
+]
 generation_config = {
     "candidate_count": 1,
     "max_output_tokens": MAX_OUTPUT_TOKENS,
@@ -42,8 +68,6 @@ def translate_text(text: str, target_lang: str) -> str:
     prompt = (
         "## System\n"
         "You are an AI that translates text into a specified target language while preserving and correctly spelling proper nouns.\n"
-        "Your goal is to ensure that known proper nouns remain unchanged and are spelled correctly according to the provided dictionary.\n"
-        "Additionally, handle multi-language contexts naturally, as users may mix languages, especially Chinese and English.\n\n"
 
         "## Input\n"
         "**Proper Nouns Dictionary (By Language)**\n"
@@ -74,7 +98,7 @@ def translate_text(text: str, target_lang: str) -> str:
 
         "**Ensure that the output is strictly just the translated text with no extra formatting or explanations!**"
     )
-    
+
     match = None
     extracted = ""
     while match is None:
@@ -155,65 +179,49 @@ async def speech2text(audio_content: bytes):
 def merge_text(A: str, B: str, conf=-1):
     """
     Merges two overlapping sentences while preserving the original language.
-    Ensures the output is formatted for easy parsing and separates complete/incomplete parts.
+    Fixes speech recognition errors and ensures grammatical correctness.
 
     Returns:
-        tuple: (complete_text, incomplete_text)
+        str: Merged sentence
     """
     prompt = (
         "## System\n"
         "You are an AI that merges overlapping sentences while preserving meaning and fluency. "
-        "The context is a meeting record, so it might contain different people speaking with different languages."
-        "Fix speech recognition errors and ensure grammatical correctness.\n\n"
-
+        "The context is a meeting record where participants may switch languages, especially for technical terms.\n"
+        "Ensure grammatical correctness and fix speech recognition errors while maintaining multilingual integrity.\n"
+        "\n"
         "## Input\n"
-        f"Sentence PRE (may be empty): {A}\n"
+        f"Sentence PRE: {A}\n"
         f"Sentence SUF: {B}\n"
-        f"Confidence of Sentence Suf: {conf} (-1 if undefined)"
-        f"Pre must go before Suf, and Pre might overlap with Suf.\n\n"
-
+        f"Confidence of Sentence SUF: {conf} (-1 if undefined)\n"
+        "Pre must go before Suf, and Pre might overlap with Suf.\n"
+        "\n"
         "## Task\n"
-        "1. Identify the language(s) and detect overlaps.\n"
-        "2. Correct speech recognition errors without altering meaning.\n"
-        "3. Ensure the merged sentence is natural and grammatically correct.\n"
-        # "4. Separate the text into **complete** (self-contained) and **incomplete** (needs more context) parts.\n"
-        # "5. **Ensure the complete part appears at the beginning of the merged sentence, followed by the incomplete part.**\n\n"
-
+        "1. Identify language(s) and detect overlaps.\n"
+        "2. Correct speech recognition errors without altering meaning while trying not to delete stuff.\n"
+        "3. Ensure the merged sentence is natural and grammatically correct. If a phrase is wierd in CHINESE, it is likely ENGLISH!!!\n"
+        "\n"
         "## Thought Process\n"
         "1. Identify overlapping words or phrases.\n"
-        "2. Check for misrecognitions or cut-off phrases.\n"
-        # "3. Ensure the **complete part** is a full, independent thought and must appear first in the sentence.\n"
-        # "4. Mark anything that requires more information as **incomplete**, and ensure it comes after the complete part.\n\n"
-
+        "2. Detect and fix misrecognitions or cut-off phrases.\n"
+        "3. Ensure the merged sentence is fluent and self-contained.\n"
+        "\n"
         "## Response Format\n"
         "### Thought Process ###\n"
-        "[Explain how you identified errors and merge the PRE and SUF strings]\n"
+        "[Explain how you identified errors and merged the PRE and SUF strings]\n"
         "### Merged Text ###\n"
         "[Full merged sentence]\n"
-        "### End ###\n\n"
-        # "### Complete Part ###\n"
-        # "[Complete Part (must be at the start of the merged sentence)]\n"
-        # "### Incomplete Part ###\n"
-        # "[Incomplete Part (must follow the complete part)]\n"
-        # "### End ###\n\n"
-
-        # "**Complete Part Criteria:**\n"
-        # "- A grammatically correct, natural sentence that stands alone.\n"
-        # "- Must always appear at the **beginning** of the full sentence.\n"
-        # "- Should not leave the reader expecting more information.\n"
-        # "- Example incomplete phrase: 'This meeting is to ask evan'.\n"
-        # "- Example complete sentence: 'This meeting aims to discuss company culture.'\n\n"
-        # "- If the entire sentence is incomplete, leave the complete section empty.\n\n"
-
-        # "**Incomplete Part Criteria:**\n"
-        # "- Any phrase requiring additional context to be meaningful.\n"
-        # "- Must always appear **after** the complete part in the full merged sentence.\n"
-        # f"- This part should be as long as possible without exceeding {MAX_CONTENT_LENGTH} characters.\n\n"
-
-        # "NOTE: The **Complete Part must be go before the **Incomplete Part**. Do not reorder.\n"
+        "### End ###\n"
+        "\n"
+        "## Reference Proper Nouns\n"
+        f"English: {ENGLISH_DICT}\n"
+        f"Chinese: {CHINESE_DICT}\n"
+        f"German: {GERMAN_DICT}\n"
+        f"Japanese: {JAPANESE_DICT}\n"
+        f"Descriptions: {DESC_DICT}\n\n"
+        "## Common IT Terms\n"
+        f"common_it_terms = {short_it_terms}\n\n"
     )
-
-    # Extract merged sentence
 
     match = None
     while match is None:
@@ -224,25 +232,7 @@ def merge_text(A: str, B: str, conf=-1):
         )
         match = re.search(r"### Merged Text ###\n(.*?)\n### End ###",
                           response.text, re.DOTALL)
-        # TODO: add something to check if the format is correct and provide more error detection
-
         merged_text = match.group(1).strip() if match else ""
-
-    # Extract Complete Part
-    # match = re.search(r"### Complete Part ###\n(.*?)\n### Incomplete Part ###", response.text, re.DOTALL)
-    # complete_text = match.group(1).strip() if match else ""
-
-    # Extract Incomplete Part
-    # match = re.search(r"### Incomplete Part ###\n(.*?)\n### End ###", response.text, re.DOTALL)
-    # incomplete_text = match.group(1).strip() if match else ""
-
-    # Extract complete and incomplete parts
-    '''
-    print("Merged Sentence:", merged_text)
-    print("Complete Part:", complete_text)
-    print("Incomplete Part:", incomplete_text)
-    print("Conf: ", conf)
-    '''
 
     return merged_text
 
